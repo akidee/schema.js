@@ -1,10 +1,14 @@
 Tolerant value adaptation and validation conforming to JSON Schema for node.js ( http://tools.ietf.org/html/draft-zyp-json-schema-02 )
 Version 0.1
 
+## Dependencies
 
-# Standard
+* CommonJS compatible framework (e.g. node.js)
+* extensions.js ( http://github.com/akidee/extensions.js )
 
-## Not supported
+## Standard
+
+### Not supported
 
 * 5.13 (unqiueItems)
 * 5.20 (format) - validation
@@ -12,22 +16,22 @@ Version 0.1
 * 5.24 (disallow)
 * 6 (Hyper Schema)
 	
-## Planned support
+### Planned support
 
 * 5.25 (extends)
 	
-## Additions
+### Additions
 
 * apply - user defined apply function
 * fitMinMax - make number fit minimum/maximum, if minimum/maximumCanEqual is not false
 	
 	
-# Platforms
+## Platforms
 
 It's currently optimized for node.js.
 	
 	
-# Example - Google like search parameters
+## Example - Google like search parameters
 
 	var assert = require('assert'),
 		Schema = require('schema'); // Schema is a contructor
