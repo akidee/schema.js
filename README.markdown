@@ -3,7 +3,9 @@
 Modular data schema validation and adaptation according to [JSON Schema](http://json-schema.org/) for JavaScript (CommonJS). In development.
 
 The following documents were regarded:
+
 * http://tools.ietf.org/html/draft-zyp-json-schema-02
+
 * http://groups.google.com/group/json-schema/web/json-schema-proposal-working-draft
 
 ## Overview
@@ -12,27 +14,29 @@ In schema.js there are 3 classes:
 
 * Schema: Instances contain a JSON Schema.
 
-	var Schema = require('schema');
+		var Schema = require('schema');
 	
-	// mySchema instanceof Schema === true
-	var mySchema = Schema.create({type:'integer'});
+		// mySchema instanceof Schema === true
+		var mySchema = Schema.create({type:'integer'});
 
 * Schema.Validation: The validation done with a schema and an instance.
 
-	// validation instanceof Schema.Validation === true
-	var validation = mySchema.validate(5);
+		// validation instanceof Schema.Validation === true
+		var validation = mySchema.validate(5);
 	
 A Schema.Validation instance implicits a finished validation, that has several properties:
 
-1. instance - the passed instance (adapted or not, depending of your schema settings)
-2. errors - array of Schema.Validation.Error instances
-3. validation.isError() - returns true if 1 or more errors occured
+	1. instance - the passed instance (adapted or not, depending of your schema settings)
+	2. errors - array of Schema.Validation.Error instances
+	3. validation.isError() - returns true if 1 or more errors occured
 
 * Schema.Validation.Error: validation Error - an instance has the following properties:
 
-1. path - the path in the object tree
-2. name - the schema property that was violated
-3. message - localized (still not supported)
+	1. path - the path in the object tree
+	2. name - the schema property that was violated
+	3. message - localized (still not supported)
+
+When writing a new schema for your project, your can use the file PROPERTY_OVERVIEW to get a quick overview over all supported properties.
 
 ## schema.js is different
 
