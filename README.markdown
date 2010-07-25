@@ -24,7 +24,7 @@ In schema.js there are 3 classes:
 		// validation instanceof Schema.Validation === true
 		var validation = mySchema.validate(5);
 	
-A Schema.Validation instance implicits a finished validation, that has several properties:
+	A Schema.Validation instance implicits a finished validation, that has several properties:
 
 	1. instance - the passed instance (adapted or not, depending of your schema settings)
 	2. errors - array of Schema.Validation.Error instances
