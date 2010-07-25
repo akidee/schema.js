@@ -1,40 +1,44 @@
-Tolerant value adaptation and validation conforming to JSON Schema for node.js ( http://tools.ietf.org/html/draft-zyp-json-schema-02 )
-Version 0.1
+# schema.js
+
+Modular data schema validation and adaptation according to JSON Schema for JavaScript (CommonJS).
+
+The following documents were regarded:
+* http://tools.ietf.org/html/draft-zyp-json-schema-02
+* http://groups.google.com/group/json-schema/web/json-schema-proposal-working-draft
 
 ## Dependencies
 
-* CommonJS compatible framework (e.g. node.js)
+* JavaScript engine
+* CommonJS implementation (e.g. node.js)
 * extensions.js ( http://github.com/akidee/extensions.js )
 
-## Standard
+## Still not supported
 
-### Not supported
+* unqiueItems
+* format - including validation
+* divisibleBy
+* disallow
+* identity - cannot easily be validated
+* Hyper Schema
+	
+## Additions
 
-* 5.13 (unqiueItems)
-* 5.20 (format) - validation
-* 5.23 (divisibleBy)
-* 5.24 (disallow)
-* 6 (Hyper Schema)
-	
-### Planned support
+### Plugins
 
-* 5.25 (extends)
-	
-### Additions
+You can define your own plugins. There are two types:
 
-* apply - user defined apply function
-* fitMinMax - make number fit minimum/maximum, if minimum/maximumCanEqual is not false
-	
-	
-## Platforms
+1) fallbacks for JSON Schema check fails
+2) adapters
 
-It's currently optimized for node.js.
-	
-	
-## Example - Google like search parameters
+Here you see 2 examples from plugins/default.js - the first one is a fallback, the second one is an adapter:
+
+
+
+
+## Example: Google like search parameters
 
 	var assert = require('assert'),
-		Schema = require('schema'); // Schema is a contructor
+		Schema = require('schema');
 	
 	var result, errors, schema = {
 	
@@ -114,3 +118,29 @@ It's currently optimized for node.js.
 	);
 
 You find this example in test.js
+
+
+## License
+
+(The MIT License)
+
+Copyright (c) 2009 Andreas Kalsch &lt;andreaskalsch@gmx.de&gt;
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

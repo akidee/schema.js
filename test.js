@@ -1,1388 +1,1929 @@
-var Schema = require('schema'),
+// schema.js - test - Copyright Andreas Kalsch <andreaskalsch@gmx.de> (MIT Licensed)
+
+
+
+
+var sys = require('sys'),
 	assert = require('assert'),
-	sys = require('sys'),
-	lib = require('lib');
-	
-var errors,
-	result,
-	a = assert.strictEqual,
-	tests = [],
-	errors = [];
-	
-	
-
-// Schema.number()
-
-
-result = Schema.number(undefined,undefined,errors=[]);
-a(
-	result, 
-	undefined
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'optional'
-);
-
-
-result = Schema.number(-1.3454,undefined,errors=[]);
-a(
-	result,
-	-1.3454
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.number(10000,undefined,errors=[]);
-a(
-	result,
-	10000
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.number('-1.3454',undefined,errors=[]);
-a(
-	result,
-	-1.3454
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
+		a = assert.strictEqual,
+		d = assert.deepEqual,
+	Schema = require('schema');
 
 
 
-result = Schema.number('10000',undefined,errors=[]);
-a(
-	result,
-	10000
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
 
+var v;
 
-result = Schema.number('-ä1.3454',undefined,errors=[]);
-a(
-	result,
-	'-ä1.3454'
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
-);
+// To test checkers only, use strict fallbacks
+Schema.prototype.setFallbacks(Schema.STRICT_FALLBACKS);
 
+function S (schema) {
 
-result = Schema.number('ä1_0000',undefined,errors=[]);
-a(
-	result,
-	'ä1_0000'
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
-);
+	return Schema.create(schema);
+};
 
+function V (schema, instance) {
 
-result = Schema.number(true,undefined,errors=[]);
-a(
-	result,
-	1
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.number(false,undefined,errors=[]);
-a(
-	result,
-	0
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.number('3.12345',{maxDecimal:4},errors=[]);
-a(
-	result,
-	3.1234
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.number(-100.001,{maxDecimal:0},errors=[]);
-a(
-	result,
-	-100
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.number('-100.001',{maxDecimal:0,minimum:-50},errors=[]);
-a(
-	result,
-	-100
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'minimum'
-);
-
-
-result = Schema.number('-100.001',{maxDecimal:0,minimum:-500,maximum:-200},errors=[]);
-a(
-	result,
-	-100
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'maximum'
-);
-
-
-result = Schema.number(5,{maxDecimal:0,minimum:-10.5,maximum:100},errors=[]);
-a(
-	result,
-	5
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.number(5,{'enum':[1,2,3,5]},errors=[]);
-a(
-	result,
-	5
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.number('10',{'enum':[10]},errors=[]);
-a(
-	result,
-	10
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-var divBy5 = function (value, errors, path) {
-	
-	var v = Math.round(value / 5);
-	if (v * 5 === value) return v;
-	else {
-	
-		Schema.push(errors, new Schema.Error(path, 'not divisble by 5'));
-		return value;
-	}
+	return Schema.create(schema).validate(instance);
 };
 
 
-result = Schema.number(13,{adapt:divBy5},errors=[]);
+
+
+// Schema.Validation.Error
+
 a(
-	result,
-	13
+	new Schema.Validation.Error instanceof Schema.Validation.Error,
+	true
 );
+
 a(
-	errors.length, 
+	new Schema.Validation.Error instanceof Error,
+	true
+);
+
+a(
+	(new Schema.Validation.Error).message,
+	''
+);
+
+
+
+
+// Schema.Validation
+
+
+	// optional
+
+v = V({type:'any'}, undefined);
+
+a(
+	v.errors.length,
 	1
 );
+
 a(
-	errors.length ? errors[0].name : '',
-	'not divisble by 5'
+	v.errors.length ? v.errors[0].name : '',
+	'optional'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+a(
+	v.instance,
+	undefined
+);
+
+v = V({type:'any'}, 1);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+a(
+	v.instance,
+	1
+);
+
+v = V({type:'any',optional:true}, undefined);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+a(
+	v.instance,
+	undefined
 );
 
 
-result = Schema.number(10,{adapt:divBy5},errors=[]);
+	// adapters
+	
+Schema.plugins.strToArray = function (instance) {
+
+	if (typeof instance !== 'string') {
+	
+		this.pushError('strToArray');
+		return instance;
+	}
+	
+	return instance.split(',');
+};
+
+v = V({
+	type:'array',
+	adapters: 'strToArray'
+}, 'a,b');
+
 a(
-	result,
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	['a', 'b']
+);
+
+v = V({
+	type:'string',
+	adapters: [
+		'strToArray',
+		function (instance) {
+
+			if (!(instance instanceof Array)) {
+			
+				this.pushError('filter');
+				return instance;
+			}
+			
+			return instance.join('.');
+		}
+	]
+}, 'a,b');
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	'a.b'
+);
+
+v = V({
+	type:'string',
+	adapters: [
+		'strToArray',
+		'strToArray'
+	]
+}, 'a,b');
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'strToArray'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	['a', 'b']
+);
+
+
+	// type
+	
+	
+		// null
+		
+v = V({
+	type:'null'
+}, null);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	null
+);
+
+v = V({
+	type:'null'
+}, 1);
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'type'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	1
+);
+
+
+
+		// array
+
+v = V({
+	type:'array'
+}, []);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	[]
+);
+
+v = V({
+	type:'array'
+}, '');
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'type'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	''
+);
+
+v = V({
+	type:'array',
+	minItems: 2
+}, [1,2]);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	[1,2]
+);
+
+v = V({
+	type:'array',
+	minItems: 3
+}, [1,2]);
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'minItems'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	[1,2]
+);
+
+v = V({
+	type:'array',
+	maxItems: 2
+}, [1,2]);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	[1,2]
+);
+
+v = V({
+	type:'array',
+	maxItems: 1,
+	fallbacks: {maxItems:'pushError'}
+}, [1,2]);
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'maxItems'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	[1,2]
+);
+
+v = V({
+	type:'array',
+	items: S({
+		type:'integer'
+	})
+}, [1,2]);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	[1,2]
+);
+
+v = V({
+	type:'array',
+	items: S({
+		type:'string'
+	})
+}, [1,2]);
+
+a(
+	v.errors.length,
 	2
 );
+
 a(
-	errors.length, 
+	v.errors.length ? v.errors[0].name : '',
+	'type'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[0]
+);
+
+d(
+	v.instance,
+	[1,2]
+);
+
+v = V({
+	type:'array',
+	items: S({
+		type:'integer'
+	}),
+	additionalProperties:false
+}, [1,2]);
+
+a(
+	v.errors.length,
 	0
 );
+
 a(
-	errors.length ? errors[0].name : '',
+	v.errors.length ? v.errors[0].name : '',
 	''
 );
 
-
-
-// Schema.integer()
-
-
-result = Schema.integer(undefined,undefined,errors=[]);
-a(
-	result, 
-	undefined
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
 );
+
+d(
+	v.instance,
+	[1,2]
+);
+
+v = V({
+	type:'array',
+	items: [
+		S({
+			type:'string'
+		}),
+		S({
+			type:'boolean'
+		})
+	]
+}, ['',false,9]);
+
 a(
-	errors.length, 
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	['',false,9]
+);
+
+v = V({
+	type:'array',
+	items: [
+		S({
+			type:'string'
+		}),
+		S({
+			type:'boolean'
+		})
+	]
+}, [9,false,9]);
+
+a(
+	v.errors.length,
 	1
 );
-a(
-	errors.length ? errors[0].name : '',
-	'optional'
-);
-
-
-result = Schema.integer(undefined,{optional:true},errors=[]);
-a(
-	result, 
-	undefined
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.integer(-10.6,undefined,errors=[]);
-a(
-	result, 
-	-10
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.integer(5.2,undefined,errors=[]);
-a(
-	result, 
-	5
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.integer(10000.8,undefined,errors=[]);
-a(
-	result, 
-	10000
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.integer(true,undefined,errors=[]);
-a(
-	result, 
-	1
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.integer(false,undefined,errors=[]);
-a(
-	result, 
-	0
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.integer('1.4',undefined,errors=[]);
-a(
-	result, 
-	1
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.integer('aspdgihsafig',undefined,errors=[]);
-a(
-	result, 
-	'aspdgihsafig'
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
-);
-
-
-result = Schema.integer('08',undefined,errors=[]);
-a(
-	result, 
-	8
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.integer({},undefined,errors=[]);
-a(
-	typeof result, 
-	'object'
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
-);
-
-
-result = Schema.integer([],undefined,errors=[]);
-a(
-	result.length, 
-	0
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
-);
-
-
-
-// Schema.boolean()
-
-result = Schema.boolean(1.4545,undefined,errors=[]);
-a(
-	result, 
-	true
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.boolean(0,undefined,errors=[]);
-a(
-	result, 
-	false
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.boolean('false',undefined,errors=[]);
-a(
-	result, 
-	false
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.boolean('fasfhdgjhdfglse',undefined,errors=[]);
-a(
-	result, 
-	true
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.boolean('1.000',undefined,errors=[]);
-a(
-	result, 
-	true
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.boolean('23452',undefined,errors=[]);
-a(
-	result, 
-	true
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.boolean('0.000',undefined,errors=[]);
-a(
-	result, 
-	false
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.boolean({},undefined,errors=[]);
-a(
-	typeof result, 
-	'object'
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
-);
-
-
-result = Schema.boolean([],undefined,errors=[]);
-a(
-	result instanceof Array,
-	true
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
-);
-
-
-
-// Schema.string()
-
-
-result = Schema.string(undefined,undefined,errors=[]);
-a(
-	result,
-	undefined
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'optional'
-);
-
-
-result = Schema.string(undefined,{optional:true},errors=[]);
-a(
-	result,
-	undefined
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.string({},undefined,errors=[]);
-a(
-	typeof result,
-	'object'
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
-);
-
-
-var O = {toString: function () { return 'STRING'; }};
-result = Schema.string(O,undefined,errors=[]);
-a(
-	result,
-	'STRING'
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-O = {toString: 'STRING'};
-result = Schema.string(O,undefined,errors=[]);
-a(
-	typeof result,
-	'object'
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
-);
-
-
-result = Schema.string('',{minLength:1},errors=[]);
-a(
-	result,
-	''
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'minLength'
-);
-
-
-result = Schema.string('A',{minLength:1},errors=[]);
-a(
-	result,
-	'A'
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.string('123456',{maxLength:5},errors=[]);
-a(
-	result,
-	'123456'
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'maxLength'
-);
-
-
-result = Schema.string('12345',{maxLength:5},errors=[]);
-a(
-	result,
-	'12345'
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.string('ABCDEF12345',{pattern:/[A-Z]+/},errors=[]);
-a(
-	result,
-	'ABCDEF12345'
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.string('ABCDEF12345',{pattern:/G+/},errors=[]);
-a(
-	result,
-	'ABCDEF12345'
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'pattern'
-);
-
-
-result = Schema.string('a',{enum:['a', 'b']},errors=[]);
-a(
-	result,
-	'a'
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.string('c',{enum:['a', 'b']},errors=[]);
-a(
-	result,
-	'c'
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'enum'
-);
-
-
-result = Schema.string(10000,undefined,errors=[]);
-a(
-	result,
-	'10000'
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.string(0.12345,undefined,errors=[]);
-a(
-	result,
-	'0.12345'
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.string(true,undefined,errors=[]);
-a(
-	result,
-	'true'
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.string([],undefined,errors=[]);
-a(
-	result instanceof Array,
-	true
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
-);
-
-
-
-// Schema.object()
-
-
-result = Schema.object(undefined,undefined,errors=[]);
-a(
-	result,
-	undefined
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'optional'
-);
-
-
-result = Schema.object(undefined,{optional:true},errors=[]);
-a(
-	result,
-	undefined
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.object([],undefined,errors=[]);
-a(
-	result instanceof Array,
-	false
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
 
-result = Schema.object({},{properties:{
-	a: {type:'integer'}
-}},errors=[]);
 a(
-	result instanceof Object,
-	true
+	v.errors.length ? v.errors[0].name : '',
+	'type'
 );
-a(
-	errors.length, 
-	1
-);
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	['a']
-);
-a(
-	errors.length ? errors[0].name : '',
-	'optional'
-);
-
-
-result = Schema.object({a:1},{properties:{
-	a: {type:'integer',requires:'b'}
-}},errors=[]);
-a(
-	errors.length, 
-	1
-);
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	['b']
-);
-a(
-	errors.length ? errors[0].name : '',
-	'requires'
-);
 
-
-result = Schema.object({a:1}, {
-	type:'object',
-	properties: {
-		a: {
-			type:'integer',
-			requires: {
-				type:'object',
-				properties: {
-					b: {type:'string'}
-				}
-			}
-		}
-	}
-}, errors=[]);
-a(
-	errors.length, 
-	1
-);
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	['b']
-);
-a(
-	errors.length ? errors[0].name : '',
-	'optional'
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[0]
 );
 
-
-result = Schema.object({a:1,b:new Date},{properties:{
-	a: {type:'integer',requires:{type:'object',properties:{b:{type:'string'}}}}
-}},errors=[]);
-a(
-	errors.length, 
-	0
-);
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	''
+d(
+	v.instance,
+	[9,false,9]
 );
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
 
-result = Schema.object({a:1}, {
-	type:'object',
+v = V({
+	type:'array',
+	items: [
+		S({
+			type:'string'
+		}),
+		S({
+			type:'boolean'
+		})
+	],
 	additionalProperties: false
-}, errors=[]);
+}, ['',false]);
+
 a(
-	errors.length, 
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	['',false]
+);
+
+v = V({
+	type:'array',
+	items: [
+		S({
+			type:'string'
+		}),
+		S({
+			type:'boolean'
+		})
+	],
+	additionalProperties: false
+}, ['',false,1]);
+
+a(
+	v.errors.length,
 	1
 );
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	['a']
-);
+
 a(
-	errors.length ? errors[0].name : '',
+	v.errors.length ? v.errors[0].name : '',
 	'additionalProperties'
 );
 
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
 
-result = Schema.object({a:1}, {
+d(
+	v.instance,
+	['',false,1]
+);
+
+v = V({
+	type:'array',
+	items: [
+		S({
+			type:'string'
+		}),
+		S({
+			type:'boolean'
+		})
+	],
+	additionalProperties: true
+}, ['',false,1]);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	['',false,1]
+);
+
+v = V({
+	type:'array',
+	items: [
+		S({
+			type:'string'
+		}),
+		S({
+			type:'boolean'
+		})
+	],
+	additionalProperties: S({
+		type: 'integer'
+	})
+}, ['',false,1]);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	['',false,1]
+);
+
+v = V({
+	type:'array',
+	items: [
+		S({
+			type:'string'
+		}),
+		S({
+			type:'boolean'
+		})
+	],
+	additionalProperties: S({
+		type: 'integer'
+	})
+}, ['',false,'1']);
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'type'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[2]
+);
+
+d(
+	v.instance,
+	['',false,'1']
+);
+
+
+
+
+		// object
+
+v = V({
+	type:'object'
+}, {});
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	[]
+);
+
+v = V({
+	type:'object'
+}, '');
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'type'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+a(
+	v.instance,
+	''
+);
+
+v = V({
+	type:'object',
+	properties: {
+	
+		a: S({
+		
+			type: 'integer'
+		})
+	}
+}, {a:1});
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	{a:1}
+);
+
+v = V({
+	type:'object',
+	properties: {
+	
+		a: S({
+		
+			type: 'integer'
+		})
+	}
+}, {a:false});
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'type'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	['a']
+);
+
+d(
+	v.instance,
+	{a:false}
+);
+
+v = V({
+	type:'object',
+	properties: {
+	
+		a: S({
+		
+			type: 'integer'
+		})
+	}
+}, {});
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'optional'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	['a']
+);
+
+d(
+	v.instance,
+	{}
+);
+
+v = V({
+	type:'object',
+	properties: {
+	
+		a: S({
+		
+			type: 'integer'
+		})
+	},
+	additionalProperties: false
+}, {a:1});
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	{a:1}
+);
+
+v = V({
+	type:'object',
+	properties: {
+	
+		a: S({
+		
+			type: 'integer'
+		})
+	},
+	additionalProperties: false
+}, {a:1,b:1});
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'additionalProperties'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	{a:1,b:1}
+);
+
+v = V({
+	type:'object',
+	properties: {
+	
+		a: S({
+		
+			type: 'integer'
+		})
+	},
+	additionalProperties: true
+}, {a:1,b:1});
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	{a:1,b:1}
+);
+
+
+		// number
+		
+v = V({
+	type:'number'
+}, '5');
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'type'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	'5'
+);
+
+v = V({
+	type:'number'
+}, 5);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	5
+);
+
+v = V({
+	type:'number',
+	minimum: 10
+}, 5);
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'minimum'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	5
+);
+
+v = V({
+	type:'number',
+	minimum: 10
+}, 10);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	10
+);
+
+v = V({
+	type:'number',
+	maximum: 2
+}, 5);
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'maximum'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	5
+);
+
+v = V({
+	type:'number',
+	maximum: 12
+}, 10);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	10
+);
+
+v = V({
+	type:'number',
+	maxDecimal:2
+}, 10.12);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	10.12
+);
+
+v = V({
+	type:'number',
+	maxDecimal:1
+}, 10.12);
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'maxDecimal'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	10.12
+);
+
+v = V({
+	type:'integer'
+}, 1.2);
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'type'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	1.2
+);
+
+v = V({
+	type:'integer'
+}, 1.0);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	1
+);
+
+v = V({
+	type:'integer',
+	maxDecimal:-1
+}, 10);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	10
+);
+
+v = V({
+	type:'integer',
+	maxDecimal:-1
+}, 11);
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'maxDecimal'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	11
+);
+
+
+		// string
+		
+v = V({
+	type:'string'
+}, 11);
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'type'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	11
+);
+
+v = V({
+	type:'string',
+	pattern:/[a-z]/
+}, '_ _');
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'pattern'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	'_ _'
+);
+
+v = V({
+	type:'string',
+	pattern:/[a-z]/
+}, 'mdg');
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	'mdg'
+);
+
+v = V({
+	type:'string',
+	minLength: 1
+}, '');
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'minLength'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	''
+);
+
+v = V({
+	type:'string',
+	minLength: 2
+}, 'aa');
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	'aa'
+);
+
+v = V({
+	type:'string',
+	maxLength: 2
+}, 'aaa');
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'maxLength'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+d(
+	v.instance,
+	'aaa'
+);
+
+v = V({
+	type:'string',
+	maxLength: 2
+}, 'aa');
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	'aa'
+);
+
+
+
+		// boolean
+
+v = V({
+	type:'boolean'
+}, false);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+a(
+	v.instance,
+	false
+);
+
+v = V({
+	type:'boolean'
+}, 'false');
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'type'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+a(
+	v.instance,
+	'false'
+);
+
+
+
+	// enum
+	
+v = V({
+	type:'string',
+	enum: ['a', 'b', 'c']
+}, 'd');
+
+a(
+	v.errors.length,
+	1
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'enum'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	[]
+);
+
+a(
+	v.instance,
+	'd'
+);
+
+v = V({
+	type:'string',
+	enum: ['a', 'b', 'c']
+}, 'a');
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+a(
+	v.instance,
+	'a'
+);
+
+v = V({
+	type:'string',
+	requires: 'a'
+}, 'a');
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+a(
+	v.instance,
+	'a'
+);
+
+v = V({
+	type:'object',
+	properties: {
+	
+		a: S({
+		
+			type: 'integer',
+			requires: 'b',
+			optional: true
+		})
+	}
+}, {});
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	{}
+);
+
+v = V({
 	type:'object',
 	properties: {
 	
 		a: {
 		
-			type: 'string'
+			type: 'integer',
+			requires: {
+				
+				b: S({
+				
+					type: 'any'
+				})
+			},
+			optional: true
 		}
-	},
-	additionalProperties: false
-}, errors=[]);
-a(
-	errors.length, 
-	0
-);
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	''
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
+	}
+}, {a:1});
 
-
-result = Schema.object({a:'___'},{type:'object',additionalProperties: {
-	type:'integer'
-}},errors=[]);
 a(
-	errors.length, 
+	v.errors.length,
 	1
 );
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	['a']
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
-);
 
-
-result = Schema.object({a:'___'},{type:'object',additionalProperties: false},errors=[]);
 a(
-	errors.length, 
-	1
-);
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	['a']
-);
-a(
-	errors.length ? errors[0].name : '',
-	'additionalProperties'
-);
-
-
-
-// Schema.array()
-
-
-result = Schema.array(false,undefined,errors=[]);
-a(
-	result instanceof Array,
-	true
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.array('',undefined,errors=[]);
-a(
-	result instanceof Array,
-	true
-);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.array({},undefined,errors=[]);
-a(
-	result instanceof Object,
-	true
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
-);
-
-
-result = Schema.array('sdogjsdf',undefined,errors=[]);
-a(
-	result,
-	'sdogjsdf'
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
-);
-
-
-result = Schema.array('sdogjsdf',undefined,errors=[]);
-a(
-	result,
-	'sdogjsdf'
-);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
-);
-
-
-result = Schema.array([],{minItems:1},errors=[]);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'minItems'
-);
-
-
-result = Schema.array([],{minItems:0},errors=[]);
-a(
-	errors.length, 
-	0
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.array([1, 2],{maxItems:1},errors=[]);
-a(
-	errors.length, 
-	1
-);
-a(
-	errors.length ? errors[0].name : '',
-	'maxItems'
-);
-
-result = Schema.array([1, '___'], {items:{type:'integer'}}, errors=[]);
-a(
-	errors.length, 
-	1
-);
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	[1]
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
-);
-
-
-result = Schema.array([2,{a:5}], {
-	items: [
-		{type:'integer'},
-		{
-			type:'object',
-			properties: {a:{type:'integer'}}
-		}
-	]
-}, errors=[]);
-a(
-	errors.length, 
-	0
-);
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	''
-);
-a(
-	errors.length ? errors[0].name : '',
-	''
-);
-
-
-result = Schema.array([2], {
-	items: [
-		{type:'integer'},
-		{
-			type:'object',
-			properties:{a:{type:'integer'}}
-		}
-	]
-}, errors=[]);
-a(
-	errors.length, 
-	1
-);
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	[1]
-);
-a(
-	errors.length ? errors[0].name : '',
+	v.errors.length ? v.errors[0].name : '',
 	'optional'
 );
 
+d(
+	v.errors.length ? v.errors[0].path : '',
+	['b']
+);
 
-result = Schema.array([2,{a:2},6], {
-	items: [
-		{type:'integer'}, 
+d(
+	v.instance,
+	{a:1}
+);
+
+v = V({
+	type:'object',
+	properties: {
+	
+		a: {
+		
+			type: 'integer',
+			requires: {
+				
+				b: {
+				
+					type: 'any'
+				}
+			},
+			optional: true
+		}
+	}
+}, {a:1,b:1});
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	{a:1,b:1}
+);
+
+var s = S({
+
+	type: 'object',
+	properties: {
+	
+		word: {
+		
+			type: 'string',
+			minLength: 1
+		},
+		related: {
+		
+			type: 'array'
+		}
+	},
+	adapters: function (instance) {
+	
+		instance.done = true;
+		return instance;
+	}
+});
+s.properties.related.items = s;
+
+var i = {
+	word: 'green',
+	related: [
+	
 		{
-			type:'object',
-			properties:{a:{type:'integer'}}
+			word: 'red'
 		}
 	]
-}, errors=[]);
+};
+i.related[0].related = i;
+
+v = V(s, i);
+
 a(
-	errors.length, 
+	v.errors.length,
 	0
 );
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	''
-);
+
 a(
-	errors.length ? errors[0].name : '',
+	v.errors.length ? v.errors[0].name : '',
 	''
 );
 
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
 
-result = Schema.array([2,{a:2},6], {
-	items: [
-		{type:'integer'},
+// Will break deepEqual - http://github.com/ry/node/issues/issue/207
+// But if script finishes without this check, my validation has detected the recursion
+/*i = {
+	word: 'green',
+	related: [
+	
 		{
-			type:'object',
-			properties:{a:{type:'integer'}}
+			word: 'red',
+			done: 1
 		}
 	],
-	additionalProperties:false
-}, errors=[]);
+	done: 1
+};
+i.related[0].related = i;
+
+/*d(
+	v.instance,
+	i
+);*/
+
+i = {
+	word: 'green',
+	related: [
+	
+		{
+			word: ''
+		}
+	]
+};
+i.related[0].related = i;
+
+v = V(s, i);
+
 a(
-	errors.length, 
+	v.errors.length,
 	1
 );
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	[2]
-);
+
 a(
-	errors.length ? errors[0].name : '',
-	'additionalProperties'
+	v.errors.length ? v.errors[0].name : '',
+	'minLength'
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	['related', 0, 'word']
 );
 
 
-result = Schema.array([2,{a:2},6], {
-	items: [
-		{type:'integer'},
-		{
-			type:'object',
-			properties:{a:{type:'integer'}}
+
+
+// Validating a schema
+
+	
+	// resolve refs - relative
+
+v = Schema.instances.jsonSchemaCore.validate({
+	type: 'object',
+	properties: {
+	
+		a: {$ref:'#'}
+	}
+});
+
+Schema.resolveRefs();
+
+a(
+	v.instance instanceof Schema,
+	true
+);
+
+a(
+	v.instance.properties.a instanceof Schema,
+	true
+);
+
+
+	// resolve refs - by ID
+
+v = Schema.instances.jsonSchemaCore.validate({
+	id: 'xyz',
+	type: 'object',
+	properties: {
+	
+		a: {$ref:'xyz'}
+	}
+});
+
+Schema.resolveRefs();
+
+a(
+	v.instance instanceof Schema,
+	true
+);
+
+a(
+	v.instance.properties.a instanceof Schema,
+	true
+);
+
+
+	// extends
+
+v = Schema.instances.jsonSchemaCore.validate({
+	id: 'wxyz',
+	type: 'object',
+	properties: {
+	
+		b: {
+			type: 'integer'
 		}
-	],
-	additionalProperties:{}
-}, errors=[]);
+	},
+	extends:{$ref:'xyz'}
+});
+
+Schema.resolveRefs();
+
 a(
-	errors.length, 
-	0
+	v.instance instanceof Schema,
+	true
 );
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	''
-);
+
 a(
-	errors.length ? errors[0].name : '',
-	''
+	v.instance.extends instanceof Schema,
+	true
 );
 
-
-result = Schema.array([2,{a:2},6], {
-	items: [
-		{type:'integer'},
-		{
-			type:'object',
-			properties:{a:{type:'integer'}}
-		}
-	],
-	additionalProperties:{type:'string'}
-}, errors=[]);
 a(
-	errors.length, 
-	0
+	v.instance.properties.b instanceof Schema,
+	true
 );
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	''
-);
+
+
+
+
+// Real world example: Article with comments
+
+v = Schema.create({
+	id: 'article',
+	type: 'object',
+	properties: {
+	
+		a: {$ref:'xyz'}
+	}
+});
+
+Schema.resolveRefs();
+
 a(
-	errors.length ? errors[0].name : '',
-	''
+	v instanceof Schema,
+	true
 );
 
-
-result = Schema.array([2,{a:2},6], {
-	items: [
-		{type:'integer'},
-		{
-			type:'object',
-			properties:{a:{type:'integer'}}
-		}
-	],
-	additionalProperties:{type:'object'}
-}, errors=[]);
 a(
-	errors.length, 
-	1
-);
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	[2]
-);
-a(
-	errors.length ? errors[0].name : '',
-	'cast'
+	v.properties.a instanceof Schema,
+	true
 );
 
 
 
-// Schema.apply()
 
+// Complex example
 
-var schema = {
+Schema.prototype.setFallbacks(Schema.TOLERANT_FALLBACKS);
+
+var result, errors, schema = Schema.create({
 
 	type: 'object',
 	properties: {
@@ -1392,7 +1933,8 @@ var schema = {
 			type: 'string',
 			minLength: 1,
 			maxLength: 200,
-			optional: true
+			'default':'',
+			fallbacks: {maxLength:'truncateToMaxLength'}
 		},
 		
 		hl: {
@@ -1400,9 +1942,10 @@ var schema = {
 			type: 'string',
 			enum: ['en', 'de', 'fr'],
 			'default': 'en',
-			adapt: function (value, errors, path) {
+			adapters: function (value) {
 			
-				return value.toLowerCase();
+				if (typeof value === 'object') return value;
+				return String(value).toLowerCase();
 			}
 		},
 		
@@ -1412,7 +1955,6 @@ var schema = {
 			minimum: 0,
 			maximum: 991,
 			maximumCanEqual: false,
-			fitMinMax: true,
 			'default': 0
 		},
 		
@@ -1434,17 +1976,17 @@ var schema = {
 	},
 	
 	additionalProperties: false
-};
+});
 
-
-result = Schema.apply({
+validation = schema.validate({
 
 	q: 'OK',
 	start: -5,
 	num: -100.99
-}, schema, errors=[]);
+});
+
 assert.deepEqual(
-	result,
+	validation.instance,
 	{
 		q: 'OK',
 		start: 0,
@@ -1453,181 +1995,31 @@ assert.deepEqual(
 		hl: 'en'
 	}
 );
-a(
-	errors.length,
-	0
-);
 
-
-result = Schema.apply({}, schema, errors=[]);
-a(
-	result.q,
-	undefined
-);
-a(
-	errors.length,
-	0
-);
-
-
-result = Schema.apply({
-	hl: 'De'
-}, schema, errors=[]);
-a(
-	result.hl,
-	'de'
-);
-a(
-	errors.length,
-	0
-);
-
-
-result = Schema.apply({
-	hl: '__'
-}, schema, errors=[]);
-a(
-	result.hl,
-	'__'
-);
-a(
-	errors.length,
-	1
-);
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	['hl']
-);
-a(
-	errors.length ? errors[0].name : '',
-	'enum'
-);
-
-
-result = Schema.apply({
-	start: 1000
-}, schema, errors=[]);
-a(
-	result.start,
-	1000
-);
-a(
-	errors.length,
-	1
-);
-assert.deepEqual(
-	errors.length ? errors[0].path : '',
-	['start']
-);
-a(
-	errors.length ? errors[0].name : '',
-	'maximum'
-);
-
-
-result = Schema.apply(null, {
-	type:['object', 'null']
-}, errors=[]);
-a(
-	result, 
-	null
-);
-a(
-	errors.length, 
-	0
-);
-
-
-result = Schema.apply(1.567, {
-	type:['number', 'integer']
-}, errors=[]);
-a(
-	result, 
-	1.567
-);
-a(
-	errors.length, 
-	0
-);
-
-
-result = Schema.apply('1.56', {
-	type:['number', 'integer']
-}, errors=[]);
-a(
-	result, 
-	1.56
-);
-a(
-	errors.length, 
-	0
-);
-
-
-result = Schema.apply(1.567, {
-	type:['number', 'boolean']
-}, errors=[]);
-a(
-	result, 
-	1.567
-);
-a(
-	errors.length, 
-	0
-);
-
-
-result = Schema.apply(true, {
-	type:['number', 'boolean']
-}, errors=[]);
-a(
-	result, 
-	1
-);
-a(
-	errors.length, 
-	0
-);
-
-
-result = Schema.apply('false', {
-	type:['number', 'boolean']
-}, errors=[]);
-a(
-	result, 
+assert.strictEqual(
+	validation.isError(),
 	false
 );
-a(
-	errors.length, 
-	0
-);
 
 
-result = Schema.apply(false, {
-	type:['integer', 'number']
-}, errors=[]);
-a(
-	result, 
-	0
-);
-a(
-	errors.length, 
-	0
-);
+// Test, if a several schemas will be used for the same object, but an endless recursion is prohibited
 
+var schema = Schema.create({
+	
+	type: 'object',
+	properties: {
+		
+		a: {
+			optional: true,
+			extends: {$ref:'#'},
+			requires: 'b'
+		}
+	}
+});
 
-result = Schema.apply(1.5, {
-	type:['integer', 'number']
-}, errors=[]);
-a(
-	result, 
-	1
-);
-a(
-	errors.length, 
-	0
-);
+Schema.resolveRefs();
 
+var obj = {a:{}};
+var validation = schema.validate(obj);
 
-
-sys.puts('OK');
+//sys.puts(sys.inspect(validation.errors[0]))

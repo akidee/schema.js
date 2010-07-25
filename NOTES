@@ -1,0 +1,64 @@
+The property "extends" in a JSON schema cannot be described completely by JSON Schema. See schemas/jsonSchemaCore.js
+Now the pair (validationID, schemaId) must be unique, so that in the same validation different schemas (via requires or extends) can be used to validate the same object -> test
+
+Schema.id -> test ref
+resolveRefs only iterate over new schemas	
+Document plugins / fallbacks
+mehr tests nötig
+extends
+
+keine Daten verändern, sodass JSON.stringify ein korrektes JSON schema ausspuckt
+also keine echtes regexp, stattdessen zusätzliche Eigenschaft!
+Ebenso requires
+
+$id für Flag nutzen, und Liste separat in Validation speichern
+
+
+
+
+To doc:
+
+
+- no several schemas in type?
+
+- No URL
+
+- No "$schema"
+
+type, if tolerant cast does not work
+	set default...
+	add Error
+optional, if !optional && value not defined
+	set default...
+	add Error
+enum, if enum does not contain value
+	set default...
+	add Error
+maxDecimal, if too many decimals
+	round
+	set default...
+	add Error
+minimum/maximum, if our of range
+	set default/minimum/maximum...
+	add Error
+minLength, if too short
+	set default...
+	add Error
+maxLength, if too long
+	shorten
+	set default...
+	add Error
+pattern, if value does not match
+	set default...
+	add Error
+requires, if is string and property is missing
+	set default... for property
+	add Error
+additionalProperties, if false and found
+	remove
+	add Error
+minItems, if <
+	add Error
+maxItems, if >
+	remove
+	add Error
