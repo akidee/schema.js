@@ -1,10 +1,63 @@
 # schema.js
 
-Modular data schema validation and adaptation according to JSON Schema for JavaScript (CommonJS).
+Modular data schema validation and adaptation according to [JSON Schema](http://json-schema.org/) for JavaScript (CommonJS). In development.
 
 The following documents were regarded:
 * http://tools.ietf.org/html/draft-zyp-json-schema-02
 * http://groups.google.com/group/json-schema/web/json-schema-proposal-working-draft
+
+## Overview
+
+In schema.js there are 3 classes:
+
+* Schema: Instances contain a JSON Schema.
+
+	var Schema = require('schema');
+	
+	// mySchema instanceof Schema === true
+	var mySchema = Schema.create({type:'integer'});
+
+* Schema.Validation: The validation done with a schema and an instance.
+
+	// validation instanceof Schema.Validation === true
+	var validation = mySchema.validate(5);
+	
+A Schema.Validation instance implicits a finished validation, that has several properties:
+
+1. instance - the passed instance (adapted or not, depending of your schema settings)
+2. errors - array of Schema.Validation.Error instances
+3. validation.isError() - returns true if 1 or more errors occured
+
+* Schema.Validation.Error: validation Error - an instance has the following properties:
+
+1. path - the path in the object tree
+2. name - the schema property that was violated
+3. message - localized (still not supported)
+
+## schema.js is different
+
+### Validation tolerance
+
+By default, it tries to adapt your data to the schema. Example: '5' will be casted to 5, if the schema requires the type 'integer'. But if you want to validate strictly, define your schema like this:
+
+	var mySchema = Schema.create({type:'integer', fallbacks: Schema.STRICT_FALLBACKS});
+	
+### Modular architecture
+	
+Internally, schema.js uses checkers and fallbacks. Checkers check strictly, if an instance does violate the schema. If a schema property is violated, a fallback will be called, that can try to adapt the instance or push an error, if it fails.
+Additionally, you can implement own adapters and fallbacks. Adapters can be used to change a value before the validation starts. (More documentation soon.)
+
+#### Schema.STRICT_FALLBACKS
+
+In any case an error will be pushed, if a schema property is violated.
+
+#### Schema.TOLERANT_FALLBACKS
+
+If a property is violated, a tolerant callback will be called that tries to adapt the value to the schema. If this fails, an error will be pushed.
+
+### Sophisticated
+
+Recursions are detected for both schemas and objects. So no endless stacks here. 
 
 ## Dependencies
 
@@ -15,32 +68,19 @@ The following documents were regarded:
 ## Still not supported
 
 * unqiueItems
-* format - including validation
+* format: including validation
 * divisibleBy
 * disallow
-* identity - cannot easily be validated
 * Hyper Schema
-	
-## Additions
+* $ref with URLs
+* type: usage of schemas
 
-### Plugins
-
-You can define your own plugins. There are two types:
-
-1) fallbacks for JSON Schema check fails
-2) adapters
-
-Here you see 2 examples from plugins/default.js - the first one is a fallback, the second one is an adapter:
-
-
-
-
-## Example: Google like search parameters
+## Extended example: Google like search parameters
 
 	var assert = require('assert'),
 		Schema = require('schema');
 	
-	var result, errors, schema = {
+	var result, errors, schema = Schema.create({
 	
 		type: 'object',
 		properties: {
@@ -50,7 +90,8 @@ Here you see 2 examples from plugins/default.js - the first one is a fallback, t
 				type: 'string',
 				minLength: 1,
 				maxLength: 200,
-				optional: true
+				'default':'',
+				fallbacks: {maxLength:'truncateToMaxLength'}
 			},
 			
 			hl: {
@@ -58,9 +99,10 @@ Here you see 2 examples from plugins/default.js - the first one is a fallback, t
 				type: 'string',
 				enum: ['en', 'de', 'fr'],
 				'default': 'en',
-				adapt: function (value, errors, path) {
+				adapters: function (value) {
 				
-					return value.toLowerCase();
+					if (typeof value === 'object') return value;
+					return String(value).toLowerCase();
 				}
 			},
 			
@@ -70,7 +112,6 @@ Here you see 2 examples from plugins/default.js - the first one is a fallback, t
 				minimum: 0,
 				maximum: 991,
 				maximumCanEqual: false,
-				fitMinMax: true,
 				'default': 0
 			},
 			
@@ -92,17 +133,17 @@ Here you see 2 examples from plugins/default.js - the first one is a fallback, t
 		},
 		
 		additionalProperties: false
-	};
+	});
 	
-	result = Schema.apply({
+	validation = schema.validate({
 	
 		q: 'OK',
 		start: -5,
 		num: -100.99
-	}, schema, errors=[]);
+	});
 	
 	assert.deepEqual(
-		result,
+		validation.instance,
 		{
 			q: 'OK',
 			start: 0,
@@ -113,11 +154,13 @@ Here you see 2 examples from plugins/default.js - the first one is a fallback, t
 	);
 	
 	assert.strictEqual(
-		errors.length,
-		0
+		validation.isError(),
+		false
 	);
 
-You find this example in test.js
+
+You see, that you can even define fallbacks for single properties. (More documentation later.)
+You find this example in test.js.
 
 
 ## License

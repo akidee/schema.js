@@ -2019,7 +2019,28 @@ var schema = Schema.create({
 
 Schema.resolveRefs();
 
-var obj = {a:{}};
-var validation = schema.validate(obj);
+var obj = {a:{},b:0};
+var v = schema.validate(obj);
 
-//sys.puts(sys.inspect(validation.errors[0]))
+a(
+	v.errors.length,
+	0
+);
+
+var obj = {a:1,b:0};
+var v = schema.validate(obj);
+
+a(
+	v.errors.length,
+	1
+);
+
+d(
+	v.errors.length ? v.errors[0].path : [],
+	['a']
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	'type'
+);
