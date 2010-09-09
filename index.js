@@ -272,7 +272,7 @@ Object.extend(Validation.prototype, {
 				instance = this.maxItems(instance); if (this.wasError()) return instance;
 				
 				instance = this.items(instance); if (this.wasError()) return instance;
-				
+
 				instance = this.additionalProperties(instance); if (this.wasError()) return instance;
 				
 				if (isFirst) instance = this.enum(instance);
@@ -635,6 +635,19 @@ Object.extend(Schema, {
 		}
 		
 		return validation.instance;
+	},
+	
+	createSeveral: function (schemaDict) {
+	
+		for (var key in schemaDict) {
+		
+			if (schemaDict[key].id === undefined) schemaDict[key].id = key;
+			
+			
+			schemaDict[key] = this.create(schemaDict[key]);
+		}
+		
+		return schemaDict;
 	},
 
 	instances: {},

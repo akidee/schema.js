@@ -9,6 +9,37 @@ Keine Daten verändern, sodass JSON.stringify ein korrektes JSON schema ausspuck
 	also keine echtes regexp, stattdessen zusätzliche Eigenschaft
 	Ebenso requires usw.
 
+An id must not have . and # 
+
+Bei extends werden möglicherweise Dinge redundant validiert (was so sein kann, wenn zusätzliche Objekt eigenschaften definiert wurden). Errors (also path + name) sollten unique sein.
+
+validations.errors should itself be an arry, but you can throw any object in JS anyway.
+
+Nichtvererbbarkeit von properties:
+
+zB optional=true überschreibt nicht optional=false
+additionalProperties=false kann nicht von additionalProperties=true/{...} überschrieben werden
+
+Besseres extends, das wirklich überschreibt, statt dass von unten nach oben validiert wird und sich Widersprüche ergeben?
+
+Validation von addionalproperties.key/index als string!
+
+Arguments to Array (cast)
+
+Write new JSON Schema draft
+
+async!
+
+extends
+
+Errors sowohl als Baum als auch als Liste
+
+draft: Unterstützung von Schemas als Arrays von Schemas (wie dann Objekt manipulieren?)
+
+UI
+
+evtl. check nur aufrufen wenn existent, also if (this.schema.x) imnstance = this.x ...
+
 
 To doc:
 

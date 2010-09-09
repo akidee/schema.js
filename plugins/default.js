@@ -1,4 +1,6 @@
 var sys = require('sys');
+require('extensions');
+
 
 module.exports = {
 
@@ -211,9 +213,15 @@ module.exports = {
 	
 			if (this.schema.maxItems !== undefined) {
 	
-				for (var li = instance.length, i = this.schema.maxItems; i < li; i++) {
+				/// instance.length will not change
+				/*for (var li = instance.length, i = this.schema.maxItems; i < li; i++) {
 				
 					delete instance[i];
+				}*/
+				
+				if (instance.length > this.schema.maxItems) {
+				
+					instance.splice(this.schema.maxItems);
 				}
 			}
 			else this.pushError(errorName);
