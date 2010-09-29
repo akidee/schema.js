@@ -955,3 +955,5 @@ d(
 	v.instance,
 	[1]
 );
+
+console.log('Passed');

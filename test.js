@@ -11,13 +11,94 @@ var sys = require('sys'),
 
 
 
-// example form README.markdown
+// example 1) from README.markdown
 
 // mySchema instanceof Schema === true
 var mySchema = Schema.create({type:'integer'});
   
 // validation instanceof Schema.Validation === true
 var validation = mySchema.validate(5);
+
+
+// example 2) from README.markdown:
+
+var result, errors, schema = Schema.create({
+
+    type: 'object',
+    properties: {
+
+        q: {
+
+            type: 'string',
+            minLength: 1,
+            maxLength: 200,
+            'default':'',
+            fallbacks: {maxLength:'truncateToMaxLength'}
+        },
+
+        hl: {
+
+            type: 'string',
+            enum: ['en', 'de', 'fr'],
+            'default': 'en',
+            adapters: function (value) {
+
+                if (typeof value === 'object') return value;
+                return String(value).toLowerCase();
+            }
+        },
+
+        start: {
+
+            type: 'integer',
+            minimum: 0,
+            maximum: 991,
+            maximumCanEqual: false,
+            'default': 0
+        },
+
+        num: {
+
+            type: 'integer',
+            minimum: 1,
+            maximum: 100,
+            fitMinMax: true,
+            'default': 10
+        },
+
+        order: {
+
+            type: 'string',
+            enum: ['name', 'date'],
+            'default': 'date'
+        }
+    },
+
+    additionalProperties: false
+});
+
+validation = schema.validate({
+
+    q: 'OK',
+    start: -5,
+    num: -100.99
+});
+
+assert.deepEqual(
+    validation.instance,
+    {
+        q: 'OK',
+        start: 0,
+        num: 1,
+        order: 'date',
+        hl: 'en'
+    }
+);
+
+assert.strictEqual(
+    validation.isError(),
+    false
+);
 
 
 
@@ -2053,3 +2134,5 @@ a(
 	v.errors.length ? v.errors[0].name : '',
 	'type'
 );
+
+console.log('Passed');
