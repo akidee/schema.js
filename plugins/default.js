@@ -186,7 +186,10 @@ module.exports = {
 
 		return function (instance) {
 
-			if ('default' in this.schema) return this.schema['default'];
+			if ('default' in this.schema) {
+				var def = this.schema['default'];
+				return typeof def === 'function' ? def.call(this) : def;
+			}
 
 			this.pushError(errorName);
 		};
