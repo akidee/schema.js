@@ -80,3 +80,10 @@ minItems, if <
 maxItems, if >
 	remove
 	add Error
+	
+
+fallbacks sind nur für Validation, nicht Schema
+plugins eher allgemein (für JSON-Kompatibilität)
+Klar trennen zwischen Schema und Schema.x 
+" Draft-kompatiblen properties und von ausschließlich x implizierten properties
+" schema und Daten, die durch Schema.x erzeugt werden

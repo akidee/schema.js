@@ -956,4 +956,38 @@ d(
 	[1]
 );
 
+
+// deleteInstance
+
+v = V(
+	S({
+		type: 'number',
+		fallbacks: {
+			type: 'deleteInstance'
+		}
+	}),
+	''
+);
+
+a(
+	v.errors.length,
+	0
+);
+
+a(
+	v.errors.length ? v.errors[0].name : '',
+	''
+);
+
+d(
+	v.errors.length ? v.errors[0].path : '',
+	''
+);
+
+d(
+	v.instance,
+	undefined
+);
+
+
 console.log('Passed');
