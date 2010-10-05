@@ -140,6 +140,8 @@ Object.extend(Validation.prototype, {
 
 		instance = this.optional(instance); if (this.wasError() || instance === undefined) return instance;
 
+		//instance = this.readonly(instance); if (this.wasError() || instance === undefined) return instance;
+
 		instance = this.adapters(instance); if (this.wasError()) return instance;
 
 		instance = this.type(instance); if (this.wasError()) return instance;
@@ -168,6 +170,13 @@ Object.extend(Validation.prototype, {
 		return (this.schema.optional || instance !== undefined)
 			? instance
 			: this.schema.__optional.call(this, instance);
+	},
+
+	readonly: function (instance) {
+
+		return (!this.schema.readonly)
+			? instance
+			: this.schema.__readonly.call(this, instance);
 	},
 
 	adapters: function (instance) {

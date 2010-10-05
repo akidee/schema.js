@@ -93,6 +93,13 @@ module.exports = {
 				adapters: 'addToRefs'
 		},
 
+		readonly: {
+			type: "boolean",
+			optional: true,
+			description: "This indicates the property can not be changed unless it is undefined.",
+				adapters: 'addToRefs'
+		},
+
 		// should go with enum
 		options: {
 
