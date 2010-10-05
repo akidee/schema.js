@@ -254,5 +254,17 @@ module.exports = {
 			this.pushError(errorName);
 			return instance;
 		};
+	},
+	
+	deleteInstance: function (errorName) { 
+
+		/*
+		Delete instance
+		*/
+		return function (instance) {
+			
+			// Solution needed - undefined means that property still exists
+			return undefined;
+		};
 	}
 };
