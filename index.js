@@ -898,4 +898,4 @@ if (validation.isError()) {
 
 
 
-global.__Schema = module.exports = Schema;
+global.__Schema = exports = Schema;

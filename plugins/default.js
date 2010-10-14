@@ -2,7 +2,7 @@ var sys = require('sys');
 require('extensions');
 
 
-module.exports = {
+exports = {
 
 
 	// fallbacks

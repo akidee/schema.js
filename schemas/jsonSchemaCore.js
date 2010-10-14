@@ -1,4 +1,4 @@
-module.exports = {
+exports = {
 
 	id: 'jsonSchemaCore',
 	title: 'JSON Schema Core Schema',
