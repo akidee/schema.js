@@ -18,7 +18,7 @@ Syntax:
 	requires
 		Schema must be object property
 	default
-	+adapter
+	+adapters
 	+fallbacks
 	(readonly)
 	(transient)

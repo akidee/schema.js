@@ -2135,4 +2135,79 @@ a(
 	'type'
 );
 
-console.log('Passed');
+
+
+// Schema.proxyFunction
+
+function add (a, b) {
+
+	return a + b;
+}
+
+add.SCHEMA = Schema.create({
+
+	type: 'array',
+	items: {
+		type: 'integer'
+	},
+	maxItems: 2
+});
+
+
+a(
+	Schema.proxyFunction(add, null, 1, 5),
+	6
+);
+
+
+try {
+	Schema.proxyFunction(add, null, 'abc', 5);
+}
+catch (e) {
+
+	a(e.length, 1);
+	a(e[0].name, 'type');
+}
+
+
+a(
+	Schema.proxyFunction(add, null, '1.02', 5),
+	6
+);
+
+
+
+// Schema.proxyFunctionAsync
+
+function addAsync (a, b, _cb) {
+
+	_cb(null, a + b);
+}
+
+addAsync.SCHEMA = Schema.create({
+
+	type: 'array',
+	items: {
+		type: 'integer'
+	},
+	maxItems: 2
+});
+
+Schema.proxyFunctionAsync(addAsync, null, '1.02', 5, 6, function (e, r1) {
+	
+	a(
+		e instanceof Error,
+		false
+	);
+
+	a(
+		r1,
+		6
+	);
+	
+	console.log('Passed');
+});
+
+
+
+//console.log('Passed');

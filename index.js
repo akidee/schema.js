@@ -876,4 +876,38 @@ if (validation.isError()) {
 
 
 
+var slice = Array.prototype.slice;
+
+Schema.proxyFunction = function (func, context) {
+
+	if (!(func.SCHEMA instanceof Schema)) throw 'No SCHEMA defined';
+	
+
+	var v = func.SCHEMA.validate(slice.call(arguments, 2)),
+		args = v.instance;
+	if (v.isError()) throw v.errors;
+	
+	
+	return func.apply(context, args);
+};
+
+Schema.proxyFunctionAsync = function (func, context) {
+
+	if (!(func.SCHEMA instanceof Schema)) throw 'No SCHEMA defined';
+	
+
+	var args = slice.call(arguments, 2),
+		_cb = args.pop(),
+		v = func.SCHEMA.validate(args),
+		args = v.instance;
+	if (v.isError()) return _cb(v.errors);
+	
+	
+	args.push(_cb);
+	func.apply(context, args);
+};
+
+
+
+
 global.__Schema = module.exports = Schema;
