@@ -1,7 +1,6 @@
-var sys = require('sys'),
-	assert = require('assert'),
-		a = assert.strictEqual,
-		d = assert.deepEqual,
+var assert = require('assert'),
+	a = assert.strictEqual,
+	d = assert.deepEqual,
 	Schema = require('schema');
 	
 	
@@ -440,22 +439,22 @@ v = V(
 
 a(
 	v.errors.length,
-	1
+	0
 );
 
 a(
 	v.errors.length ? v.errors[0].name : '',
-	'type'
+	''
 );
 
 d(
 	v.errors.length ? v.errors[0].path : '',
-	[]
+	''
 );
 
 d(
 	v.instance,
-	[]
+	true
 );
 
 
