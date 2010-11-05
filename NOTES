@@ -1,21 +1,45 @@
 To do
 ----
 
-1) New JSON schema draft:
+1) Implement JSON schema based on draft 3 (fork) - change topics:
 
-a) The definition of "extends" in the current draft is flawed. I have described the issue in this thread: http://groups.google.com/group/json-schema/browse_thread/thread/275cdf7df754448b
+- 4.1 Review /schemas
 
-Some implication of the current implementation:
-i) The property "extends" in a JSON schema cannot be described completely by JSON Schema. See schemas/jsonSchemaCore.js
-ii) Properties can be revalidated several times, same errors can be pushed several times.
-iii) Schemas contradict each other.
+- If it will not include my idea, fork the draft and add a property _"inherits"_ that solves these problems: http://groups.google.com/group/json-schema/browse_thread/thread/a863dd593c50d338
 
-If nobody cares, I will write a new draft with a better definition of "extends" and enhance schema.js according to it.
+- 5.1 Union Types - it must be _clarified_ how to use (Does a combination of simple type, schema and URI make sense?) and to validate (Do I need to copy instances?) them.
 
-b) Be able to validate object keys (type: 'string' is implicit)
+- What about using URIs instead of schemas? It is better to only use referencing with $ref
+_Discussion_: http://groups.google.com/group/json-schema/browse_thread/thread/95fb4006f1f92a40
 
-2) Better documentation of the basic concepts and the whole API.
+- 5.3 "patternProperties"
 
+- 5.4 "additionalProperties" now defaults to false.*
+
+- 5.6 "additionalItems" now defaults to what? If false *
+
+- 5.7 Replace "optional" by "required", that defaults to false.*
+
+- 5.8 Replace "requires" by "dependencies".
+
+- 5.11 Replace "maximumCanEqual" by "exclusiveMaximum"
+
+- 5.12 Replace "minimumCanEqual" by "exclusiveMinimum"
+
+- 5.15 "uniqueItems" and probably add support for complex types
+
+- 5.24 "disallow" - Should always be validated strictly, if it is a schema.
+
+- 6 Not planned to be implemented
+
+- 6.2.1/2 together with "$ref" must be part of the core schema.
+
+- 6.5 "default" must be part of the core schema
+
+*) Criticism: Just to make flawed "extends" definition work ...
+
+
+2) Better documentation of the basic concepts and the whole API, especially own properties like adapters ...
 
 type, if tolerant cast does not work
 	set default...
@@ -59,20 +83,27 @@ maxItems, if >
 3) Make a distinction between JSON and implementation specific - in this case JavaScript - representation of a schema. JSON is the exchange format - the JavaScript implementation must be able to be reserialized to its original format - a simple JavaScript object.
 Strategy is to add JavaScript specific properties as additonal properties (e.g. RegExp instead of a string, schemas untouched by "extends" and $ref objects ...
 
-4) Validate "id"
 
-5) Be able to represent validation errors both as array (to get a simple list) and object tree that corresponds to the schema.
+4) Be able to represent validation errors both as array (to get a simple list) and object tree that corresponds to the schema.
+Avoid duplicate errors by using a hash instead of array.
 !: You can throw the whole array or object as error
 
-6) schema.js needs to support async adapters and plugins. Constraint checking against a persistence layer ...
 
-7) How can a schema as array of schemas be supported? The original object will be changed, so the original must be copied before an schema array is validated.
+5) schema.js needs to support async adapters and plugins. Constraint checking against a persistence layer ...
 
-8) Check if property exists _before_ calling the checker (?)	
 
-9) fallbacks belong to Validation!
+6) Optimization: Check if property exists _before_ calling the checker (?)	
 
-10) Some guidelines:
 
-- Keep interesting data separate: the schema, the validation, ...
-- Make it clearer which data in the schema is part of the standard (Schema) and which data is needed for further purpose (Schema.Validation, ...)
+8) Separate schema and uses (validation, ...)
+a) ... into single files
+b) Put data that is not part of the standard into a sub-object that is used in a special context, like validation. Current examples: fallbacks, adapters, probably default, plugins
+
+
+9) Simpler boolean fallbacks - accept ALL values
+
+
+10) Complete i18n
+
+
+11) Client side?

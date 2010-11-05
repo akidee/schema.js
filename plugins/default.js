@@ -1,5 +1,5 @@
-var sys = require('sys');
-require('extensions');
+i18n = require('../i18n');
+//require('underscorex');
 
 
 module.exports = {
@@ -26,7 +26,10 @@ module.exports = {
 						&& instance.toString !== Array.prototype.toString
 					) return ''+instance;
 					
-					this.pushError(errorName);
+					this.pushError(
+						errorName,
+						i18n['validation_error_'+errorName]
+					);
 					return instance;
 				}
 				return ''+instance;
@@ -39,7 +42,10 @@ module.exports = {
 					inst = parseFloat(instance);
 					if (isNaN(inst)) {
 					
-						this.pushError(errorName);
+						this.pushError(
+							errorName,
+							i18n['validation_error_'+errorName]
+						);
 						return instance;
 					}
 					
@@ -56,7 +62,10 @@ module.exports = {
 					inst = parseInt(instance, 10);
 					if (isNaN(inst)) {
 					
-						this.pushError(errorName);
+						this.pushError(
+							errorName,
+							i18n['validation_error_'+errorName]
+						);
 						return instance;
 					}
 					
@@ -76,11 +85,11 @@ module.exports = {
 					return isNaN(inst) ? true : !!inst;
 				}
 				
-				if (fromType === 'object') {
+				/*if (fromType === 'object') {
 				
 					this.pushError(errorName);
 					return instance;
-				}
+				}*/
 				
 				return !!instance;
 			}
@@ -97,15 +106,21 @@ module.exports = {
 				if (!instance) return [];
 				if (instance instanceof Object) {
 				
-					if (Object.keys(instance).length === 0) return [];
+					if (_.keys(instance).length === 0) return [];
 				}
-				this.pushError(errorName);
+				this.pushError(
+					errorName,
+					i18n['validation_error_'+errorName]
+				);
 				return instance;
 			}
 			
 			if (toType === 'null') {
 			
-				this.pushError(errorName);
+				this.pushError(
+					errorName,
+					i18n['validation_error_'+errorName]
+				);
 				return instance;
 			}
 		};
@@ -117,7 +132,10 @@ module.exports = {
 	
 			if (this.schema.maxDecimal === undefined) {
 			
-				this.pushError(errorName);
+				this.pushError(
+					errorName,
+					i18n['validation_error_'+errorName]
+				);
 				return instance;
 			}
 	
@@ -132,7 +150,10 @@ module.exports = {
 	
 			if (this.schema.minimum === undefined) {
 			
-				this.pushError(errorName);
+				this.pushError(
+					errorName,
+					i18n['validation_error_'+errorName]
+				);
 				return instance;
 			}
 	
@@ -146,7 +167,10 @@ module.exports = {
 	
 			if (this.schema.maximum === undefined) {
 			
-				this.pushError(errorName);
+				this.pushError(
+					errorName,
+					i18n['validation_error_'+errorName]
+				);
 				return instance;
 			}
 		
@@ -160,7 +184,10 @@ module.exports = {
 		
 			if (this.schema.maxLength === undefined) {
 			
-				this.pushError(errorName);
+				this.pushError(
+					errorName,
+					i18n['validation_error_'+errorName]
+				);
 				return instance;
 			}
 		
@@ -185,7 +212,7 @@ module.exports = {
 			if (this.schema.type === 'object') {
 		
 				var props = this.schema.properties || {};
-				for (var ks = Object.keys(
+				for (var ks = _.keys(
 					instance
 				), li = ks.length, i = 0, key; key = ks[i], i < li; i++) {
 				
@@ -224,7 +251,13 @@ module.exports = {
 					instance.splice(this.schema.maxItems);
 				}
 			}
-			else this.pushError(errorName);
+			else {
+			
+				this.pushError(
+					errorName,
+					i18n['validation_error_'+errorName]
+				);
+			}
 			
 			return instance;
 		};
@@ -234,7 +267,10 @@ module.exports = {
 	
 		return function (instance) {
 	
-			this.pushError(errorName);
+			this.pushError(
+				errorName,
+				i18n['validation_error_'+errorName]
+			);
 			return instance;
 		};
 	},

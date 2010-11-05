@@ -3,14 +3,8 @@
  
  
 
-"use strict";
-var sys = require('sys');
-require('extensions');
-
-
-
-
-var LANG = 'de';
+require('underscorex');
+require('underscorex/object');
 
 
 
@@ -18,7 +12,7 @@ var LANG = 'de';
 function _Error (path, name, message) {
 
 	this.path = path
-		? path.clone()
+		? _.clone(path)
 		: [];
 	this.name = name || '';
 	this.message = message || '';
@@ -30,7 +24,7 @@ _Error.prototype.constructor = _Error;
 
 
 
-function Validation (rootSchema, instance) {
+function Validation (rootSchema, instance, locale) {
 
 	this.id = ++Validation._id;
 
@@ -49,6 +43,8 @@ function Validation (rootSchema, instance) {
 	/// Relevant?
 	this.rootSchema = rootSchema;
 	
+	this.locale = locale || 'en';
+	
 	// Both relevant properties the user is interested in
 	this.errors = [];
 	this.instance = instance;
@@ -57,22 +53,20 @@ function Validation (rootSchema, instance) {
 	delete this._flags, this._wasError, this._stack;
 };
 
-Object.extend(Validation.prototype, {
+_.extend(Validation.prototype, {
 
 
 	// change state
 
 	pushError: function (name, message) {
 	
-		/*message = message 
-			|| Schema.messages[name]
-				? (
-					Schema.messages[name][Schema.LANG || LANG]
-						|| Schema.messages[name].en
-				).call(this)
-				: '';*/
-	
-		this.errors.push(new _Error(this.path, name, message));
+		this.errors.push(new _Error(
+			this.path,
+			name,
+			message instanceof Object
+				? _.locale(message, this.locale)(this)
+				: message
+		));
 		this._wasError++;
 	},
 	
@@ -110,7 +104,7 @@ Object.extend(Validation.prototype, {
 	
 	getFlag: function (instance) {
 	
-		return Object.id(instance)+'_'+this.schema.id;
+		return _.objectId(instance)+'_'+this.schema.id;
 	},
 	
 	flagObject: function (instance) {
@@ -405,7 +399,7 @@ Object.extend(Validation.prototype, {
 		
 				if (!this.schema.additionalProperties) {
 					
-					for (var ks = Object.keys(
+					for (var ks = _.keys(
 						instance
 					), li = ks.length, i = 0, key; key = ks[i], i < li; i++) {
 		
@@ -417,7 +411,7 @@ Object.extend(Validation.prototype, {
 				}
 				else if (this.schema.additionalProperties !== true) {
 								
-					for (var ks = Object.keys(
+					for (var ks = _.keys(
 						instance
 					), li = ks.length, i = 0, key; key = ks[i], i < li; i++) {
 		
@@ -571,7 +565,7 @@ Object.extend(Validation.prototype, {
 	}
 });
 
-Object.extend(Validation, {
+_.extend(Validation, {
 
 	_id: 0,
 	Error: _Error
@@ -587,7 +581,7 @@ function Schema (rawSchema) {
 	if (rawSchema instanceof Schema) return rawSchema;
 	
 	
-	Object.extend(this, rawSchema);
+	_.extend(this, rawSchema);
 	
 	var id = typeof this.id === 'string'
 		? this.id
@@ -595,7 +589,7 @@ function Schema (rawSchema) {
 	this.constructor.instances[id] = this;
 };
 
-Object.extend(Schema.prototype, {
+_.extend(Schema.prototype, {
 
 	validate: function (instance) {
 	
@@ -620,7 +614,7 @@ Object.extend(Schema.prototype, {
 	}
 });
 	
-Object.extend(Schema, {
+_.extend(Schema, {
 
 	_id: 0,
 
@@ -658,22 +652,11 @@ Object.extend(Schema, {
 	
 		for (var id in this.instances) {
 
-			Object.resolveRefs(this.instances[id], true);
+			_.resolveRefs(this.instances[id], true);
 		}
 	},
 
 	plugins: {},
-	
-	messages: {
-		
-		type: {
-		
-			de: function () {
-
-				//return 'Dieser Wert muss vom Typ %s sein.'.sprintf(Schema.instances.jsonSchemaCore.properties.type.labels[this.schema.type].de);
-			}
-		}
-	},
 	
 	TOLERANT_FALLBACKS: {
 
@@ -710,11 +693,11 @@ Object.extend(Schema, {
 	}
 });
 
-Object.extend(Schema.plugins, require('./plugins/default'));
+_.extend(Schema.plugins, require('./plugins/default'));
 
 Schema.prototype.setFallbacks(Schema.TOLERANT_FALLBACKS);
 
-Object.extend(Schema.plugins, {
+_.extend(Schema.plugins, {
 
 
 	// adapters - for the core schema
@@ -728,11 +711,11 @@ Object.extend(Schema.plugins, {
 			var toPath = this.path,
 				fromPath = instance.$ref.split('.');
 			
-			Object.addRef(
+			_.addRef(
 				this.instance,
-				toPath.clone(),
+				_.clone(toPath),
 				fromPath[0] === '#'
-					? fromPath.clone()
+					? _.clone(fromPath)
 					: ['__Schema', 'instances'].concat(fromPath)
 			);
 		}
@@ -802,7 +785,7 @@ Object.extend(Schema.plugins, {
 			delete instance.fallbacks;
 		}
 		
-		Object.resetRefs(instance);
+		_.resetRefs(instance);
 		
 		return instance;
 	}
@@ -865,12 +848,12 @@ var validation = jsonSchemaCore.validate(jsonSchemaCore);
 
 if (validation.isError()) {
 
-	sys.puts('The core schema is not valid!');
+	_.log('The core schema is not valid!');
 	validation.errors.forEach(function (error) {
 	
-		sys.puts(sys.inspect(error));
+		_.log(error);
 	});
-	sys.puts(sys.inspect(validation));
+	_.log(validation);
 }
 
 
@@ -900,6 +883,7 @@ Schema.proxyFunctionAsync = function (func, context) {
 		_cb = args.pop(),
 		v = func.SCHEMA.validate(args),
 		args = v.instance;
+
 	if (v.isError()) return _cb(v.errors);
 	
 	
