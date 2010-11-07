@@ -3,11 +3,11 @@
 
 
 
-var sys = require('sys'),
-	assert = require('assert'),
-		a = assert.strictEqual,
-		d = assert.deepEqual,
+var assert = require('assert'),
+	a = assert.strictEqual,
+	d = assert.deepEqual,
 	Schema = require('schema');
+
 
 
 
@@ -15,13 +15,12 @@ var sys = require('sys'),
 
 // mySchema instanceof Schema === true
 var mySchema = Schema.create({type:'integer'});
-  
+
 // validation instanceof Schema.Validation === true
 var validation = mySchema.validate(5);
 
 
 // example 2) from README.markdown:
-
 var result, errors, schema = Schema.create({
 
     type: 'object',
@@ -104,17 +103,17 @@ assert.strictEqual(
 
 var v;
 
-// To test checkers only, use strict fallbacks
-Schema.prototype.setFallbacks(Schema.STRICT_FALLBACKS);
-
 function S (schema) {
 
-	return Schema.create(schema);
+	var s = Schema.create(schema);
+	
+	// To test checkers only, use strict fallbacks
+	return s.setFallbacks(Schema.Validation.STRICT_FALLBACKS);
 };
 
 function V (schema, instance) {
 
-	return Schema.create(schema).validate(instance);
+	return S(schema).validate(instance);
 };
 
 
@@ -214,7 +213,7 @@ a(
 
 	// adapters
 	
-Schema.plugins.strToArray = function (instance) {
+Schema.Validation.plugins.strToArray = function (instance) {
 
 	if (typeof instance !== 'string') {
 	
@@ -1255,6 +1254,7 @@ d(
 	10.12
 );
 
+
 v = V({
 	type:'number',
 	maxDecimal:1
@@ -1728,10 +1728,10 @@ v = V({
 			type: 'integer',
 			requires: {
 				
-				b: S({
+				b: {
 				
 					type: 'any'
-				})
+				}
 			},
 			optional: true
 		}
@@ -1816,7 +1816,8 @@ var s = S({
 	
 		instance.done = true;
 		return instance;
-	}
+	},
+	optional: true
 });
 s.properties.related.items = s;
 
@@ -1829,7 +1830,7 @@ var i = {
 		}
 	]
 };
-i.related[0].related = i;
+i.related[0].related = [i];
 
 v = V(s, i);
 
@@ -1877,7 +1878,7 @@ i = {
 		}
 	]
 };
-i.related[0].related = i;
+i.related[0].related = [i];
 
 v = V(s, i);
 
@@ -2092,7 +2093,7 @@ assert.strictEqual(
 );
 
 
-// Test, if a several schemas will be used for the same object, but an endless recursion is prohibited
+// Test, if several schemas will be used for the same object, but an endless recursion is prohibited
 
 var schema = Schema.create({
 	
@@ -2100,11 +2101,13 @@ var schema = Schema.create({
 	properties: {
 		
 		a: {
+			type: 'object',
 			optional: true,
 			extends: {$ref:'#'},
 			requires: 'b'
 		}
-	}
+	},
+	optional: true
 });
 
 Schema.resolveRefs();
@@ -2207,7 +2210,3 @@ Schema.proxyFunctionAsync(addAsync, null, '1.02', 5, 6, function (e, r1) {
 	
 	console.log('Passed');
 });
-
-
-
-//console.log('Passed');

@@ -129,7 +129,7 @@ module.exports = {
 		requires: {
 		
 			type: ["string", "object"],
-			properties: {"$ref": "#.properties"},
+			additionalProperties: {"$ref": "#"},
 			optional: true,
 			description: "indicates a required property or a schema that must be validated if this property is present",
 				adapters: 'addToRefs'
@@ -161,7 +161,6 @@ module.exports = {
 			fallbacks: {
 			
 				type: "object",
-				optional: true,
 				additionalProperties: {
 				
 					type: "string",
@@ -294,9 +293,9 @@ module.exports = {
 					function (instance, walker) {
 				
 						if (instance instanceof RegExp) return instance;
+						if (typeof instance === 'string') return new RegExp(instance);
 					
-					
-						return new RegExp(instance);
+						return instance;
 					}
 				]
 		},

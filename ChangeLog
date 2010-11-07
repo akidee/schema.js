@@ -1,0 +1,12 @@
+Next:
+
+* Standardized naming and directory structure
+* Simplified fallback plugins
+* Plugins now belong to Validation
+* Some validation bug fixes
+
+
+2010.09.09, Version 0.1a
+
+* Stable version, alpha because of some lacking features that would make schema.js complete.
+* Implements the 2nd JSON Schema draft

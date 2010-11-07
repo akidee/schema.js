@@ -1,7 +1,7 @@
 To do
 ----
 
-1) Implement JSON schema based on draft 3 (fork) - change topics:
+..1) Implement JSON schema based on draft 3 (fork) - change topics:
 
 - 4.1 Review /schemas
 
@@ -39,7 +39,7 @@ _Discussion_: http://groups.google.com/group/json-schema/browse_thread/thread/95
 *) Criticism: Just to make flawed "extends" definition work ...
 
 
-2) Better documentation of the basic concepts and the whole API, especially own properties like adapters ...
+..2) Better documentation of the basic concepts and the whole API, especially own properties like adapters ...
 
 type, if tolerant cast does not work
 	set default...
@@ -95,18 +95,14 @@ Avoid duplicate errors by using a hash instead of array.
 6) Optimization: Check if property exists _before_ calling the checker (?)	
 
 
-8) Separate schema and uses (validation, ...)
-a) ... into single files
-b) Put data that is not part of the standard into a sub-object that is used in a special context, like validation. Current examples: fallbacks, adapters, probably default, plugins
-
-
-9) Simpler boolean fallbacks - accept ALL values
+- Separate schema and uses (validation, ...)
+Put data that is not part of the standard into a sub-object that is used in a special context, like validation.
 
 
 10) Complete i18n
 
 
-11) Client side?
+..11) Client side?
 
 
 NPM

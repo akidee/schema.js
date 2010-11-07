@@ -9,6 +9,11 @@ require('underscorex/object');
 
 
 
+var slice = Array.prototype.slice;
+
+
+
+
 function _Error (path, name, message) {
 
 	this.path = path
@@ -19,6 +24,10 @@ function _Error (path, name, message) {
 };
 
 _Error.prototype = new Error;
+_Error.prototype.id = function () {
+
+	return [this.path, this.name];
+};
 _Error.prototype.constructor = _Error;
 
 
@@ -26,10 +35,13 @@ _Error.prototype.constructor = _Error;
 
 function Validation (rootSchema, instance, locale) {
 
-	this.id = ++Validation._id;
+	this.id = Validation._id++;
 
 	// Save combination of objects/schemas	
 	this._flags = {};
+	
+	// Unique errors
+	this._errors = {};
 
 	this._wasError = 0;
 	
@@ -60,13 +72,21 @@ _.extend(Validation.prototype, {
 
 	pushError: function (name, message) {
 	
-		this.errors.push(new _Error(
-			this.path,
-			name,
-			message instanceof Object
-				? _.locale(message, this.locale)(this)
-				: message
-		));
+		var id = JSON.stringify(
+			_Error.prototype.id.call({path: this.path, name: name})
+		);
+		if (!(id in this._errors)) {
+		
+			this._errors[id] = true;
+	
+			this.errors.push(new _Error(
+				this.path,
+				name,
+				message instanceof Object
+					? _.locale(message, this.locale)(this)
+					: message
+			));
+		}
 		this._wasError++;
 	},
 	
@@ -118,23 +138,38 @@ _.extend(Validation.prototype, {
 		return this.getFlag(instance) in this._flags;
 	},
 	
+	callPlugin: function (plugin, instance) {
+	
+		var args = arguments.length > 2
+			? slice.call(arguments, 1)
+			: [instance];
+	
+		if (typeof plugin !== 'function')
+			plugin = Validation.plugins[plugin] || Validation.plugins.pushError;
+		return plugin.apply(this, args);
+	},
+	
 	
 	
 	// start
 	
 	start: function (instance) {
-	
+		
+		if (global.__) _.log(this);
+		
 		if (instance instanceof Object) {
 		
 			if (this.isObjectFlagged(instance)) return instance;
+			
+			
 			this.flagObject(instance);
 		}
 		
 		instance = this.extends(instance); if (this.wasError()) return instance;
-
-		instance = this.optional(instance); if (this.wasError() || instance === undefined) return instance;
 		
 		instance = this.adapters(instance); if (this.wasError()) return instance;
+
+		instance = this.optional(instance); if (this.wasError() || instance === undefined) return instance;
 		
 		instance = this.type(instance); if (this.wasError()) return instance;
 		
@@ -150,6 +185,7 @@ _.extend(Validation.prototype, {
 	
 		if (!this.schema.extends) return instance;
 		
+		
 		this.push(this.schema.extends);
 		instance = this.start(instance);
 		this.pop(true);
@@ -159,9 +195,10 @@ _.extend(Validation.prototype, {
 	
 	optional: function (instance) {
 
-		return (this.schema.optional || instance !== undefined)
-			? instance
-			: this.schema.__optional.call(this, instance);
+		if (this.schema.optional || instance !== undefined) return instance;
+		
+		
+		return this.callPlugin(this.schema.fallbacks.optional, instance, 'optional');
 	},
 		
 	adapters: function (instance) {
@@ -171,13 +208,7 @@ _.extend(Validation.prototype, {
 		
 		var adapters = this.schema.adapters;
 		
-		if (!(adapters instanceof Array)) {
-
-			return (typeof adapters === 'string' 
-				? Schema.plugins[adapters]
-				: adapters).call(this, instance);
-		}
-			
+		if (!(adapters instanceof Array)) adapters = [adapters];
 
 		var len = this.errors.length,
 			adapter;
@@ -185,9 +216,7 @@ _.extend(Validation.prototype, {
 				
 			adapter = adapters[i];
 				
-			instance = (typeof adapter === 'string'
-				? Schema.plugins[adapter]
-				: adapter).call(this, instance);
+			instance = this.callPlugin(adapter, instance);
 				
 			if (this.errors.length > len) return instance;
 		}
@@ -228,7 +257,8 @@ _.extend(Validation.prototype, {
 				
 			if (!ok) {
 
-				instance = this.schema.__type.call(this, instance); if (this.wasError()) return instance;
+				instance = this.callPlugin(this.schema.fallbacks.type, instance, 'type');
+				if (this.wasError()) return instance;
 			}
 				
 			var type = typeof instance;
@@ -319,7 +349,7 @@ _.extend(Validation.prototype, {
 			/// Tolerant ?
 			return this.schema.enum.indexOf(instance) > -1 
 				? instance
-				: this.schema.__enum.call(this, instance);
+				: this.callPlugin(this.schema.fallbacks.enum, instance, 'enum');
 		}
 		
 		return instance;
@@ -338,7 +368,8 @@ _.extend(Validation.prototype, {
 				
 					properties: {}
 				};
-				tempSchema.properties[this.schema.requires] = new Schema({type:'any'});
+				tempSchema.properties[this.schema.requires] = {type:'any'};
+				
 			}
 			else {
 			
@@ -347,6 +378,8 @@ _.extend(Validation.prototype, {
 					properties: this.schema.requires
 				};
 			}
+			
+			tempSchema = Schema.create(tempSchema);
 			
 			var schema_key = this.pop();
 			
@@ -372,6 +405,7 @@ _.extend(Validation.prototype, {
 			this.parentInstance = instance;
 
 			var isIn, inst;
+			
 			for (var key in props) {
 
 				this.push(props[key], key);
@@ -405,7 +439,7 @@ _.extend(Validation.prototype, {
 		
 						if (!(key in props)) {
 						
-							return this.schema.__additionalProperties.call(this, instance);
+							return this.callPlugin(this.schema.fallbacks.additionalProperties, instance, 'additionalProperties');
 						}
 					}
 				}
@@ -430,7 +464,7 @@ _.extend(Validation.prototype, {
 					
 					if (instance.length > this.schema.items.length) {
 					
-						return this.schema.__additionalProperties.call(this, instance);
+						return this.callPlugin(this.schema.fallbacks.additionalProperties, instance, 'additionalProperties');
 					}
 				}
 				else if (this.schema.additionalProperties !== true) {
@@ -481,14 +515,14 @@ _.extend(Validation.prototype, {
 	maxItems: function (instance) {
 	
 		return this.schema.maxItems && instance.length > this.schema.maxItems
-			? this.schema.__maxItems.call(this, instance)
+			? this.callPlugin(this.schema.fallbacks.maxItems, instance, 'maxItems')
 			: instance;
 	},
 	
 	minItems: function (instance) {
 	
 		return this.schema.minItems && instance.length < this.schema.minItems
-			? this.schema.__minItems.call(this, instance)
+			? this.callPlugin(this.schema.fallbacks.minItems, instance, 'minItems')
 			: instance;
 	},
 	
@@ -505,7 +539,7 @@ _.extend(Validation.prototype, {
 			: instance > this.schema.minimum
 		)
 			? instance
-			: this.schema.__minimum.call(this, instance);
+			: this.callPlugin(this.schema.fallbacks.minimum, instance, 'minimum');
 	},
 	
 	maximum: function (instance) {
@@ -521,7 +555,7 @@ _.extend(Validation.prototype, {
 			: instance < this.schema.maximum
 		)
 			? instance
-			: this.schema.__maximum.call(this, instance);
+			: this.callPlugin(this.schema.fallbacks.maximum, instance, 'maximum');
 	},
 	
 	maxDecimal: function (instance) {
@@ -531,7 +565,7 @@ _.extend(Validation.prototype, {
 			var factor = Math.pow(10, this.schema.maxDecimal);
 			return Math.round(instance * factor) / factor === instance
 				? instance
-				: this.schema.__maxDecimal.call(this, instance);
+				: this.callPlugin(this.schema.fallbacks.maxDecimal, instance, 'maxDecimal');
 		}
 		
 		return instance;
@@ -543,7 +577,7 @@ _.extend(Validation.prototype, {
 		
 		return this.schema.pattern.test(instance)
 			? instance
-			: this.schema.__pattern.call(this, instance);
+			: this.callPlugin(this.schema.fallbacks.pattern, instance, 'pattern');
 	},
 	
 	minLength: function (instance) {
@@ -552,7 +586,7 @@ _.extend(Validation.prototype, {
 
 		return instance.length >= this.schema.minLength
 			? instance
-			: this.schema.__minLength.call(this, instance);
+			: this.callPlugin(this.schema.fallbacks.minLength, instance, 'minLength');
 	},
 	
 	maxLength: function (instance) {
@@ -561,102 +595,116 @@ _.extend(Validation.prototype, {
 	
 		return instance.length <= this.schema.maxLength
 			? instance
-			: this.schema.__maxLength.call(this, instance);
+			: this.callPlugin(this.schema.fallbacks.maxLength, instance, 'maxLength');
 	}
 });
 
 _.extend(Validation, {
 
 	_id: 0,
-	Error: _Error
-});
-
-
-
-
-function Schema (rawSchema) {
-		
-	if (typeof rawSchema === 'string') rawSchema = JSON.parse(rawSchema);
-
-	if (rawSchema instanceof Schema) return rawSchema;
+	Error: _Error,
 	
+	addPlugins: function (plugins) {
 	
-	_.extend(this, rawSchema);
-	
-	var id = typeof this.id === 'string'
-		? this.id
-		: '__'+(++Schema._id);
-	this.constructor.instances[id] = this;
-};
-
-_.extend(Schema.prototype, {
-
-	validate: function (instance) {
-	
-		return new Validation(this, instance);
-	},
-
-	setFallbacks: function (obj) {
-	
-		var adapterName;
-	
-		for (var propertyName in obj) {
-	
-			adapterName = obj[propertyName];
-	
-			if (!(adapterName in Schema.plugins)) throw 'Fallback not registered!';
-	
-	
-			this['__'+propertyName] = Schema.plugins[adapterName](propertyName);
-		}
-		
-		return this;
-	}
-});
-	
-_.extend(Schema, {
-
-	_id: 0,
-
-	create: function (rawSchema) {
-	
-		var validation = Schema.instances.jsonSchemaCore.validate(rawSchema);
-		if (validation.isError()) {
-		
-			var E = new Error('Invalid schema');
-			E.validation = validation
-			throw E;
-		}
-		
-		return validation.instance;
+		_.extend(Validation.plugins, plugins);
 	},
 	
-	createSeveral: function (schemaDict) {
-	
-		for (var key in schemaDict) {
+	plugins: {
+
+		// adapters - for the core schema
 		
-			if (schemaDict[key].id === undefined) schemaDict[key].id = key;
+		addToRefs: function (instance) {
+	
+			if (instance instanceof Object
+				&& typeof instance.$ref === 'string') {
+	
+				/// Still no URIs supported
+				var toPath = this.path,
+					fromPath = instance.$ref.split('.');
+				
+				_.addRef(
+					this.instance,
+					_.clone(toPath),
+					fromPath[0] === '#'
+						? _.clone(fromPath)
+						: ['__Schema', 'instances'].concat(fromPath)
+				);
+			}
+			
+			return instance;
+		},
+		
+		instantiateSchema: function (instance) {
+			
+			if (!(instance instanceof Object)) return instance;
 			
 			
-			schemaDict[key] = this.create(schemaDict[key]);
-		}
-		
-		return schemaDict;
-	},
-
-	instances: {},
-
-	Validation: Validation,
+			var isThisInstance = instance === this.instance;
+			if (!(instance instanceof Schema)) instance = new Schema(instance);
+			if (isThisInstance) this.instance = instance;
+			
+			if (instance.properties instanceof Object) {
 	
-	resolveRefs: function () {
+				var props = instance.properties || {};
 	
-		for (var id in this.instances) {
-
-			_.resolveRefs(this.instances[id], true);
+				for (var key in props) {
+			
+					if (props[key] instanceof Object && !(props[key] instanceof Schema))
+						props[key] = new Schema(props[key]);
+				}
+			}
+			
+			if (instance.items instanceof Array) {
+			
+				var items = instance.items;
+				for (var li = items.length, i = 0; i < li; i++) {
+			
+					if (items[i] instanceof Object && !(items[i] instanceof Schema))
+						items[i] = new Schema(items[i]);
+				}
+			}
+			else if (instance.items instanceof Object) {
+			
+				if (!(instance.items instanceof Schema))
+					instance.items = new Schema(instance.items);
+			}
+			
+			if (instance.requires 
+				&& instance.requires instanceof Object
+				&& !(instance.requires instanceof Array)) {
+			
+				var props = instance.requires;
+				for (var key in props) {
+				
+					if (global.__) _.log(key);
+					props[key] = new Schema(props[key]);
+				}
+			}
+			
+			//if (global.__) _.log(instance.requires);
+			
+			if (instance.additionalProperties instanceof Object
+				&& !(instance.additionalProperties instanceof Schema)) {
+			
+				instance.additionalProperties = new Schema(instance.additionalProperties);
+			}
+			
+			if (instance.extends instanceof Object) {
+	
+				if (!(instance.extends instanceof Schema)) {
+				
+					instance.extends = new Schema(instance.extends);
+				}
+			}
+			
+			//_.log(instance)
+			instance.setFallbacks(instance.fallbacks);
+			
+			_.resetRefs(instance);
+			
+			return instance;
 		}
 	},
-
-	plugins: {},
 	
 	TOLERANT_FALLBACKS: {
 
@@ -693,101 +741,92 @@ _.extend(Schema, {
 	}
 });
 
-_.extend(Schema.plugins, require('./plugins/default'));
-
-Schema.prototype.setFallbacks(Schema.TOLERANT_FALLBACKS);
-
-_.extend(Schema.plugins, {
+Validation.addPlugins(require('./plugins/validation'));
 
 
-	// adapters - for the core schema
+
+
+function Schema (rawSchema) {
+		
+	if (typeof rawSchema === 'string') rawSchema = JSON.parse(rawSchema);
+
+	if (rawSchema instanceof Schema) return rawSchema;
 	
-	addToRefs: function (instance) {
+	
+	_.extend(this, rawSchema);
+	
+	if (this.id === undefined) this.id = ''+Schema._id++;
+	Schema.instances[this.id] = this;
+};
 
-		if (instance instanceof Object
-			&& typeof instance.$ref === 'string') {
+_.extend(Schema.prototype, {
 
-			/// Still no URIs supported
-			var toPath = this.path,
-				fromPath = instance.$ref.split('.');
-			
-			_.addRef(
-				this.instance,
-				_.clone(toPath),
-				fromPath[0] === '#'
-					? _.clone(fromPath)
-					: ['__Schema', 'instances'].concat(fromPath)
-			);
+	validate: function (instance) {
+	
+		return new Validation(this, instance);
+	},
+
+	setFallbacks: function (fallbacks) {
+	
+		if (typeof fallbacks === 'string') {
+		
+			this.fallbacks = Validation[fallbacks];
+		}
+		else if (fallbacks === undefined) {
+		
+			this.fallbacks = Validation.TOLERANT_FALLBACKS;
+		}
+		else {
+		
+			this.fallbacks = _.extend({}, Validation.TOLERANT_FALLBACKS, fallbacks);
 		}
 		
-		return instance;
+		return this;
+	}
+});
+
+_.extend(Schema, {
+
+	_id: 0,
+
+	create: function (rawSchema) {
+	
+		var validation = Schema.instances.jsonSchemaCore.validate(rawSchema);
+		if (validation.isError()) {
+		
+			var e = new Error('Invalid schema');
+			e.errors = validation.errors;
+			throw e;
+		}
+		
+		
+		return validation.instance;
 	},
 	
-	instantiateSchema: function (instance) {
-		
-		if (instance instanceof Schema || !(instance instanceof Object)) return instance;
-		
-		
-		var isThisInstance = instance === this.instance;
-		instance = new Schema(instance);
-		if (isThisInstance) this.instance = instance;
-		
-		if (instance.properties instanceof Object) {
-
-			var props = instance.properties || {};
-
-			for (var key in props) {
-		
-				if (props[key] instanceof Object && !(props[key] instanceof Schema))
-					props[key] = new Schema(props[key]);
-			}
-		}
-		
-		if (instance.items instanceof Array) {
-		
-			var items = instance.items;
-			for (var li = items.length, i = 0; i < li; i++) {
-		
-				if (items[i] instanceof Object && !(items[i] instanceof Schema))
-					items[i] = new Schema(items[i]);
-			}
-		}
-		else if (instance.items instanceof Object) {
-		
-			if (!(instance.items instanceof Schema))
-				instance.items = new Schema(instance.items);
-		}
-		
-		if (instance.requires 
-			&& instance.requires instanceof Object
-			&& !(instance.requires instanceof Schema)) {
-		
-			instance.requires = new Schema(instance.requires);
-		}
-		
-		if (instance.additionalProperties instanceof Object
-			&& !(instance.additionalProperties instanceof Schema)) {
-		
-			instance.additionalProperties = new Schema(instance.additionalProperties);
-		}
-		
-		if (instance.extends instanceof Object) {
-
-			if (!(instance.extends instanceof Schema)) {
-			
-				instance.extends = new Schema(instance.extends);
-			}
-		}
-		
-		if (instance.fallbacks) {
+	createSeveral: function (schemaDict) {
 	
-			instance.setFallbacks(instance.fallbacks);
-			delete instance.fallbacks;
+		/// Collect ALL errors
+		for (var key in schemaDict) {
+		
+			if (schemaDict[key].id === undefined) schemaDict[key].id = key;
+			
+			
+			schemaDict[key] = this.create(schemaDict[key]);
 		}
 		
-		_.resetRefs(instance);
-		
-		return instance;
+		return schemaDict;
+	},
+
+	instances: {},
+
+	Validation: Validation,
+	
+	resolveRefs: function () {
+	
+		for (var id in this.instances) {
+
+			_.resolveRefs(this.instances[id], true);
+		}
 	}
 });
 
@@ -804,31 +843,32 @@ var jsonSchemaCore = require('./schemas/jsonSchemaCore');
  * - eventually make extends change the parent schema
  */
 
-jsonSchemaCore = new Schema(jsonSchemaCore);
-jsonSchemaCore.setFallbacks(Schema.STRICT_FALLBACKS);
+(jsonSchemaCore = new Schema(jsonSchemaCore))
+	.setFallbacks(Validation.STRICT_FALLBACKS);
 
 for (var key in jsonSchemaCore.properties) {
 
-	jsonSchemaCore.properties[key] = new Schema(jsonSchemaCore.properties[key]);
-	jsonSchemaCore.properties[key].setFallbacks(Schema.STRICT_FALLBACKS);
+	(jsonSchemaCore.properties[key] = new Schema(jsonSchemaCore.properties[key]))
+		.setFallbacks(Validation.STRICT_FALLBACKS);
 }
 
-jsonSchemaCore.properties.type.items = new Schema(jsonSchemaCore.properties.type.items);
-jsonSchemaCore.properties.type.items.setFallbacks(Schema.STRICT_FALLBACKS);
+(jsonSchemaCore.properties.type.items = new Schema(jsonSchemaCore.properties.type.items))
+	.setFallbacks(Validation.STRICT_FALLBACKS);
+	
 jsonSchemaCore.properties.type.items.enum = jsonSchemaCore.properties.type.enum;
 
 jsonSchemaCore.properties.id.pattern = new RegExp(jsonSchemaCore.properties.id.pattern);
 
-jsonSchemaCore.properties.options.items = new Schema(jsonSchemaCore.properties.options.items);
-jsonSchemaCore.properties.options.items.setFallbacks(Schema.STRICT_FALLBACKS);
+(jsonSchemaCore.properties.options.items = new Schema(jsonSchemaCore.properties.options.items))
+	.setFallbacks(Validation.STRICT_FALLBACKS);
 
-jsonSchemaCore.properties.requires.properties = jsonSchemaCore.properties;
+jsonSchemaCore.properties.requires.additionalProperties = jsonSchemaCore;
 
-jsonSchemaCore.properties.adapters.items = new Schema(jsonSchemaCore.properties.adapters.items);
-jsonSchemaCore.properties.adapters.items.setFallbacks(Schema.STRICT_FALLBACKS);
+(jsonSchemaCore.properties.adapters.items = new Schema(jsonSchemaCore.properties.adapters.items))
+	.setFallbacks(Validation.STRICT_FALLBACKS);
 
-jsonSchemaCore.properties.fallbacks.additionalProperties = new Schema(jsonSchemaCore.properties.fallbacks.additionalProperties);
-jsonSchemaCore.properties.fallbacks.additionalProperties.setFallbacks(Schema.STRICT_FALLBACKS);
+(jsonSchemaCore.properties.fallbacks.additionalProperties = new Schema(jsonSchemaCore.properties.fallbacks.additionalProperties))
+	.setFallbacks(Validation.STRICT_FALLBACKS);
 
 jsonSchemaCore.properties.properties.additionalProperties = jsonSchemaCore;
 
@@ -836,6 +876,7 @@ jsonSchemaCore.properties.properties.additionalProperties = jsonSchemaCore;
 //jsonSchemaCore.properties.extends.extends = jsonSchemaCore;
 
 jsonSchemaCore.properties.items.properties = jsonSchemaCore.properties;
+
 jsonSchemaCore.properties.items.items = jsonSchemaCore;
 
 jsonSchemaCore.properties.additionalProperties.properties = jsonSchemaCore.properties;
@@ -858,8 +899,6 @@ if (validation.isError()) {
 
 
 
-
-var slice = Array.prototype.slice;
 
 Schema.proxyFunction = function (func, context) {
 

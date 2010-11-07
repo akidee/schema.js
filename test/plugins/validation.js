@@ -5,20 +5,22 @@ var assert = require('assert'),
 	
 	
 	
-Schema.prototype.setFallbacks(Schema.STRICT_FALLBACKS);
+
+var v;
 
 function S (schema) {
 
-	return Schema.create(schema);
+	var s = Schema.create(schema);
+	return s;
+	// To test checkers only, use strict fallbacks
+	//return s.setFallbacks(Schema.Validation.TOLERANT_FALLBACKS);
 };
 
 function V (schema, instance) {
 
-	return new Schema.Validation(
-		S(schema),
-		instance
-	);
+	return S(schema).validate(instance);
 };
+
 
 
 
@@ -28,10 +30,10 @@ function V (schema, instance) {
 	// string
 
 v = V(
-	S({
+	{
 		type: 'string',
 		fallbacks: {type: 'castTolerantlyToType'}
-	}),
+	},
 	5
 );
 
@@ -756,13 +758,13 @@ d(
 // setMaximum
 	
 v = V(
-	S({
+	{
 		type: 'number',
 		maximum: 5,
 		fallbacks: {
 			maximum: 'setMaximum'
 		}
-	}),
+	},
 	6
 );
 
