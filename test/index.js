@@ -2140,7 +2140,7 @@ a(
 
 
 
-// Schema.proxyFunction
+// _.validateCall
 
 function add (a, b) {
 
@@ -2158,13 +2158,13 @@ add.SCHEMA = Schema.create({
 
 
 a(
-	Schema.proxyFunction(add, null, 1, 5),
+	_.validateCall(add, null, 1, 5),
 	6
 );
 
 
 try {
-	Schema.proxyFunction(add, null, 'abc', 5);
+	_.validateCall(add, null, 'abc', 5);
 }
 catch (e) {
 
@@ -2174,13 +2174,13 @@ catch (e) {
 
 
 a(
-	Schema.proxyFunction(add, null, '1.02', 5),
+	_.validateCall(add, null, '1.02', 5),
 	6
 );
 
 
 
-// Schema.proxyFunctionAsync
+// _.validateCallAsync
 
 function addAsync (a, b, _cb) {
 
@@ -2196,7 +2196,7 @@ addAsync.SCHEMA = Schema.create({
 	maxItems: 2
 });
 
-Schema.proxyFunctionAsync(addAsync, null, '1.02', 5, 6, function (e, r1) {
+_.validateCallAsync(addAsync, null, '1.02', 5, 6, function (e, r1) {
 	
 	a(
 		e instanceof Error,

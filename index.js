@@ -242,7 +242,8 @@ _.extend(Validation.prototype, {
 			
 				if (toType === 'null') return instance === null;
 				
-				if (toType === 'array') return instance instanceof Array;
+				if (toType === 'array') return instance instanceof Array 
+					|| _.isArguments(instance);
 				
 				if (toType === 'object') return instance instanceof Object && !(instance instanceof Array);
 				
@@ -900,37 +901,40 @@ if (validation.isError()) {
 
 
 
-Schema.proxyFunction = function (func, context) {
-
-	if (!(func.SCHEMA instanceof Schema)) throw 'No SCHEMA defined';
+_.mixin({
 	
+	validateCall: function (func, context) {
 
-	var v = func.SCHEMA.validate(slice.call(arguments, 2)),
-		args = v.instance;
-	if (v.isError()) throw v.errors;
+		if (!(func.SCHEMA instanceof Schema)) throw 'No SCHEMA defined';
+		
 	
+		var v = func.SCHEMA.validate(slice.call(arguments, 2)),
+			args = v.instance;
+		if (v.isError()) throw v.errors;
+		
+		
+		return func.apply(context, args);
+	},
+
+	validateCallAsync: function (func, context) {
+
+		if (!(func.SCHEMA instanceof Schema)) throw 'No SCHEMA defined';
+		
 	
-	return func.apply(context, args);
-};
-
-Schema.proxyFunctionAsync = function (func, context) {
-
-	if (!(func.SCHEMA instanceof Schema)) throw 'No SCHEMA defined';
-	
-
-	var args = slice.call(arguments, 2),
-		_cb = args.pop(),
-		v = func.SCHEMA.validate(args),
-		args = v.instance;
-
-	if (v.isError()) return _cb(v.errors);
-	
-	
-	args.push(_cb);
-	func.apply(context, args);
-};
+		var args = slice.call(arguments, 2),
+			_cb = args.pop(),
+			v = func.SCHEMA.validate(args),
+			args = v.instance;
+		if (v.isError()) return _cb(v.errors);
+		
+		
+		args.push(_cb);
+		func.apply(context, args);
+	}
+});
 
 
 
 
+/// _ ?
 global.__Schema = module.exports = Schema;

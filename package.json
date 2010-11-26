@@ -1,0 +1,14 @@
+{
+  "name"          : "schema",
+  "description"   : "JSON Schema data validation and adaptation",
+  "url"           : "http://github.com/akidee/schema.js",
+  "keywords"      : ["json schema", "schema", "data", "validation"],
+  "author"        : "Andreas Kalsch <mail@akidee.de>",
+  "contributors"  : [],
+  "dependencies"  : {
+    "underscorex": ">=0.1"
+  },
+  "lib"           : ".",
+  "main"          : "index.js",
+  "version"       : "0.2.0"
+}
