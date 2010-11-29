@@ -33,7 +33,9 @@ _Error.prototype.constructor = _Error;
 
 
 
-function Validation (rootSchema, instance, locale) {
+function Validation (rootSchema, instance, options) {
+
+	options = options || {};
 
 	this.id = Validation._id++;
 
@@ -55,7 +57,7 @@ function Validation (rootSchema, instance, locale) {
 	/// Relevant?
 	this.rootSchema = rootSchema;
 	
-	this.locale = locale || 'en';
+	this.locale = options.locale || 'en';
 	
 	// Both relevant properties the user is interested in
 	this.errors = [];
@@ -100,6 +102,15 @@ _.extend(Validation.prototype, {
 	isError: function () {
 	
 		return this.errors.length > 0;
+	},
+
+	getError: function () {
+
+		var e = new Error(
+			_.locale(i18n['validation_error'], this.locale)(this)
+		);
+		e.errors = this.errors;
+		return e;
 	},
 	
 	push: function (schema, key) {

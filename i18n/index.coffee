@@ -3,6 +3,11 @@ Always edit the .coffee files and then compile with coffee script
 ###
 
 module.exports =
+	validation_error:
+		de: () ->
+			"Diese Instanz ist nicht gültig"
+		en: ->
+			"This instance is not valid"
 	validation_error_type:
 		de: () ->
 			"Ungültiger Typ"
