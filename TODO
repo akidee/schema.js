@@ -109,6 +109,11 @@ NPM
 
 
 
+Make schema.js instantiable to allow running separate instances with different global options.
+Useful options are: default fallbacks, i18n file
+
+
+
 Put proxyFuncs in _
 
 

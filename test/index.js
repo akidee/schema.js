@@ -1898,6 +1898,19 @@ d(
 );
 
 
+	// getError
+
+a(
+	v.getError() instanceof Error,
+	true
+);
+
+d(
+	v.getError().errors,
+	v.errors
+);
+
+
 
 
 // Validating a schema
@@ -2168,8 +2181,8 @@ try {
 }
 catch (e) {
 
-	a(e.length, 1);
-	a(e[0].name, 'type');
+	a(e.errors.length, 1);
+	a(e.errors[0].name, 'type');
 }
 
 

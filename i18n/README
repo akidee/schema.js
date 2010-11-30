@@ -1,0 +1,5 @@
+If you want to use your own localized messages, just put your own file here that conforms to the
+format of index.js and change the path to your file in /index.js and /plugins/validation.js
+
+In the future, schema.js can be instantiated with config options where you can define the location
+of your i18n file.
