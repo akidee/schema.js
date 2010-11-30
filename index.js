@@ -3,6 +3,7 @@
  
  
 
+i18n = require('./i18n');
 require('underscorex');
 require('underscorex/object');
 
@@ -107,7 +108,7 @@ _.extend(Validation.prototype, {
 	getError: function () {
 
 		var e = new Error(
-			_.locale(i18n['validation_error'], this.locale)(this)
+			_.locale(i18n('validation_error'), this.locale)(this)
 		);
 		e.errors = this.errors;
 		return e;
