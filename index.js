@@ -804,12 +804,7 @@ _.extend(Schema, {
 	create: function (rawSchema) {
 	
 		var validation = Schema.instances.jsonSchemaCore.validate(rawSchema);
-		if (validation.isError()) {
-		
-			var e = new Error('Invalid schema');
-			e.errors = validation.errors;
-			throw e;
-		}
+		if (validation.isError()) throw validation.getError();
 		
 		
 		return validation.instance;
@@ -921,7 +916,7 @@ _.mixin({
 	
 		var v = func.SCHEMA.validate(slice.call(arguments, 2)),
 			args = v.instance;
-		if (v.isError()) throw v.errors;
+		if (v.isError()) throw v.getError();
 		
 		
 		return func.apply(context, args);
@@ -936,7 +931,7 @@ _.mixin({
 			_cb = args.pop(),
 			v = func.SCHEMA.validate(args),
 			args = v.instance;
-		if (v.isError()) return _cb(v.errors);
+		if (v.isError()) return _cb(v.getError());
 		
 		
 		args.push(_cb);
