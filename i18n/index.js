@@ -17,10 +17,10 @@
       }
     },
     validation_error_type: {
-      de: function() {
+      de: function(v) {
         return "Ungültiger Typ";
       },
-      en: function() {
+      en: function(v) {
         return "Invalid type";
       }
     },

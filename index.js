@@ -345,7 +345,7 @@ _.extend(Validation.prototype, {
 				
 				
 				if (i + 1 < li) {
-				
+
 					this.errors.splice(len);
 					this.wasError();
 				}
@@ -689,12 +689,9 @@ _.extend(Validation, {
 				var props = instance.requires;
 				for (var key in props) {
 				
-					if (global.__) _.log(key);
 					props[key] = new Schema(props[key]);
 				}
 			}
-			
-			//if (global.__) _.log(instance.requires);
 			
 			if (instance.additionalProperties instanceof Object
 				&& !(instance.additionalProperties instanceof Schema)) {
@@ -710,7 +707,6 @@ _.extend(Validation, {
 				}
 			}
 			
-			//_.log(instance)
 			instance.setFallbacks(instance.fallbacks);
 			
 			_.resetRefs(instance);

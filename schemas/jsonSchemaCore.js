@@ -196,7 +196,10 @@ module.exports = {
 			items: {"$ref": "#"},
 			description: "When the value is an array, this indicates the schema to use to validate each item in an array",
 			optional: true,
-				adapters: 'addToRefs'
+				adapters: [
+					'instantiateSchema',
+					'addToRefs'
+				]
 		},
 		
 		maxItems: {
@@ -228,7 +231,10 @@ module.exports = {
 			description: "This provides a default property definition for all properties that are not explicitly defined in an object type definition.",
 			optional: true,
 			"default": true,
-				adapters: ['addToRefs']
+				adapters: [
+					'instantiateSchema',
+					'addToRefs'
+				]
 		},
 		
 		
