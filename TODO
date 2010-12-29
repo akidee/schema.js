@@ -1,7 +1,10 @@
-To do
-----
+-- schema.toJSON()
+	- acts as method to get the original raw schema as well, including functions, but without the schema specific changes
+	- recursive
 
-..1) Implement JSON schema based on draft 3 (fork) - change topics:
+-- Shorten README, add separate doc page
+
+-- Implement JSON schema based on draft 3 (fork) - change topics:
 
 - 4.1 Review /schemas
 
@@ -38,8 +41,9 @@ _Discussion_: http://groups.google.com/group/json-schema/browse_thread/thread/95
 
 *) Criticism: Just to make flawed "extends" definition work ...
 
+-- Enable use of both version 0.2 and 0.3
 
-..2) Better documentation of the basic concepts and the whole API, especially own properties like adapters ...
+-- Better documentation of the basic concepts and the whole API, especially own properties like adapters and fallbacks
 
 type, if tolerant cast does not work
 	set default...
@@ -79,43 +83,19 @@ maxItems, if >
 	remove
 	add Error
 
+-- Rename validation.errors to report and use a list of lists. Remove (i18n) messages ... where put them?
 
-3) Make a distinction between JSON and implementation specific - in this case JavaScript - representation of a schema. JSON is the exchange format - the JavaScript implementation must be able to be reserialized to its original format - a simple JavaScript object.
-Strategy is to add JavaScript specific properties as additonal properties (e.g. RegExp instead of a string, schemas untouched by "extends" and $ref objects ...
+-- Be able to represent a validation report both as array (to get a simple list) and object tree that corresponds to the schema.
 
+-- Avoid duplicate reports
 
-4) Be able to represent validation errors both as array (to get a simple list) and object tree that corresponds to the schema.
-Avoid duplicate errors by using a hash instead of array.
-!: You can throw the whole array or object as error
+-- schema.js needs to support async adapters and plugins. Use: Constraint checking against a persistence layer ...
 
+-- Optimization: Check if property exists _before_ calling the checker (?)	
 
-5) schema.js needs to support async adapters and plugins. Constraint checking against a persistence layer ...
+-- Better support for client side
 
+-- Make schema.js instantiable to allow running separate instances with different global options.
+Useful options are: default fallbacks, i18n file, version, ...
 
-6) Optimization: Check if property exists _before_ calling the checker (?)	
-
-
-- Separate schema and uses (validation, ...)
-Put data that is not part of the standard into a sub-object that is used in a special context, like validation.
-
-
-10) Complete i18n
-
-
-..11) Client side?
-
-
-NPM
-
-
-
-Make schema.js instantiable to allow running separate instances with different global options.
-Useful options are: default fallbacks, i18n file
-
-
-
-Put proxyFuncs in _
-
-
-
-Support 2 AND 3
+-- Rename _ mixins validateCall to callValidly, add applyValidly, constructValidly and - with good documentation - f

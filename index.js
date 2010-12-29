@@ -34,6 +34,22 @@ _Error.prototype.constructor = _Error;
 
 
 
+/*Error.prototype.toSimpleString = function () {
+
+	var s = [this.message+':'];
+	if (this.errors instanceof Array) {
+
+		this.errors.forEach(function (e) {
+
+			s.push("\t"+e.path.join(', ')+': '+e.message);
+		});
+	}
+	return s.join("\n");
+};*/
+
+
+
+
 function Validation (rootSchema, instance, options) {
 
 	options = options || {};
@@ -65,7 +81,7 @@ function Validation (rootSchema, instance, options) {
 	this.instance = instance;
 	this.instance = this.start(instance);
 	
-	delete this._flags, this._wasError, this._stack;
+	delete this._flags, this._errors, this._wasError, this._stack;
 };
 
 _.extend(Validation.prototype, {
@@ -166,8 +182,6 @@ _.extend(Validation.prototype, {
 	// start
 	
 	start: function (instance) {
-		
-		if (global.__) _.log(this);
 		
 		if (instance instanceof Object) {
 		
@@ -416,7 +430,6 @@ _.extend(Validation.prototype, {
 				inst;
 			
 			this.parentInstance = instance;
-
 			var isIn, inst;
 			
 			for (var key in props) {
@@ -443,7 +456,8 @@ _.extend(Validation.prototype, {
 			if (instance instanceof Object && !(instance instanceof Array)) {
 			
 				var props = this.schema.properties || {};
-		
+
+				// this.schema.additionalProperties === false ?
 				if (!this.schema.additionalProperties) {
 					
 					for (var ks = _.keys(
@@ -629,6 +643,7 @@ _.extend(Validation, {
 		addToRefs: function (instance) {
 	
 			if (instance instanceof Object
+				&& !(instance instanceof Array)
 				&& typeof instance.$ref === 'string') {
 	
 				/// Still no URIs supported
@@ -649,7 +664,7 @@ _.extend(Validation, {
 		
 		instantiateSchema: function (instance) {
 			
-			if (!(instance instanceof Object)) return instance;
+			if (!(instance instanceof Object) || instance instanceof Array) return instance;
 			
 			
 			var isThisInstance = instance === this.instance;
@@ -799,11 +814,24 @@ _.extend(Schema, {
 	_id: 0,
 
 	create: function (rawSchema) {
+
+		try {
+
+			var json = JSON.parse(JSON.stringify(rawSchema));
+		}
+		catch (e) {
+
+			throw new Error('The raw schema cannot be stringified as JSON');
+		}
 	
 		var validation = Schema.instances.jsonSchemaCore.validate(rawSchema);
 		if (validation.isError()) throw validation.getError();
 		
-		
+
+		validation.toJSON = function () {
+
+			return json;
+		};
 		return validation.instance;
 	},
 	
@@ -933,6 +961,17 @@ _.mixin({
 		
 		args.push(_cb);
 		func.apply(context, args);
+	},
+
+	/*validateConstruction: function () {}*/
+
+	f: function (schema, func, isAsync, validateCall) {
+
+		func.SCHEMA = Schema.create(schema);
+		func.IS_ASYNC = !!isAsync;
+		func.IS_VALIDATING = !!validateCall;
+		
+		return func;
 	}
 });
 

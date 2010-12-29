@@ -3,8 +3,8 @@ Next:
 * Standardized naming and directory structure
 * Simplified fallback plugins
 * Plugins now belong to Validation
-* Some validation bug fixes
-* ...
+* Some bug fixes
+* New and renamed underscore mixins: callValidly, applyValidly, constructValidly, f
 
 
 2010.09.09, Version 0.1a

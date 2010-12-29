@@ -89,7 +89,7 @@ module.exports = {
 		if (toType === 'object') {
 		
 			if (instance instanceof Array && instance.length === 0) return {};
-			if (fromType !== 'object' || instance === null) {
+			if (fromType !== 'object' || instance === null || instance instanceof Array) {
 			
 				this.pushError(
 					errorName,
