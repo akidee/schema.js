@@ -965,12 +965,23 @@ _.mixin({
 
 	/*validateConstruction: function () {}*/
 
-	f: function (schema, func, isAsync, validateCall) {
+	f: function (schema/* ? */, validate/* ? */, isAsync/* ? */, func) {
 
-		func.SCHEMA = Schema.create(schema);
-		func.IS_ASYNC = !!isAsync;
-		func.IS_VALIDATING = !!validateCall;
+		var args = slice.call(arguments),
+			func = args.pop()
+
+		if (schema instanceof Object) {
 		
+			func.SCHEMA = Schema.create(schema)
+			func.IS_VALIDATING = !!args[1]
+			func.IS_ASYNC = !!args[2]
+		}
+		else {
+
+			func.IS_VALIDATING = false
+			func.IS_ASYNC = !!args[1]
+		}
+
 		return func;
 	}
 });
