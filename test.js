@@ -7,7 +7,7 @@ var sys = require('sys'),
 	assert = require('assert'),
 		a = assert.strictEqual,
 		d = assert.deepEqual,
-	Schema = require('schema');
+	Schema = require('./');
 
 
 

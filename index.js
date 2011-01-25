@@ -3,8 +3,8 @@
  
  
 
-require('underscorex');
-require('underscorex/object');
+var _ = require('underscorex');
+require('underscorex/object')(_);
 
 
 
