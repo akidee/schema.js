@@ -6,7 +6,7 @@
   "author"        : "Andreas Kalsch <mail@akidee.de>",
   "contributors"  : [],
   "dependencies"  : {
-    "underscorex": "0.1.0"
+    "underscorex": "0.1.1"
   },
   "lib"           : ".",
   "main"          : "index.js",

@@ -2153,7 +2153,7 @@ a(
 
 
 
-// _.validateCall
+// validateCall
 
 function add (a, b) {
 
@@ -2171,13 +2171,13 @@ add.SCHEMA = Schema.create({
 
 
 a(
-	_.validateCall(add, null, 1, 5),
+	Schema.validateCall(add, null, 1, 5),
 	6
 );
 
 
 try {
-	_.validateCall(add, null, 'abc', 5);
+	Schema.validateCall(add, null, 'abc', 5);
 }
 catch (e) {
 
@@ -2187,13 +2187,13 @@ catch (e) {
 
 
 a(
-	_.validateCall(add, null, '1.02', 5),
+	Schema.validateCall(add, null, '1.02', 5),
 	6
 );
 
 
 
-// _.validateCallAsync
+// validateCallAsync
 
 function addAsync (a, b, _cb) {
 
@@ -2209,7 +2209,7 @@ addAsync.SCHEMA = Schema.create({
 	maxItems: 2
 });
 
-_.validateCallAsync(addAsync, null, '1.02', 5, 6, function (e, r1) {
+Schema.validateCallAsync(addAsync, null, '1.02', 5, 6, function (e, r1) {
 	
 	a(
 		e instanceof Error,
@@ -2220,6 +2220,241 @@ _.validateCallAsync(addAsync, null, '1.02', 5, 6, function (e, r1) {
 		r1,
 		6
 	);
-	
-	console.log('Passed');
 });
+
+
+
+// f
+
+	// schema = null, isValidating = false, isAsync = false, func
+
+var f1 = function () {
+	
+},
+	f2 = Schema.f(f1)
+
+a(
+	f1,
+	f2
+)
+
+a(
+	f2.SCHEMA,
+	undefined
+)
+
+a(
+	f2.IS_VALIDATING,
+	undefined
+)
+
+a(
+	f2.IS_ASYNC,
+	false
+)
+
+
+	// schema = null, isValidating = false, isAsync = true, func
+
+var f1 = function () {
+	
+},
+	f2 = Schema.f(true, f1)
+
+a(
+	f1,
+	f2
+)
+
+a(
+	f2.SCHEMA,
+	undefined
+)
+
+a(
+	f2.IS_VALIDATING,
+	undefined
+)
+
+a(
+	f2.IS_ASYNC,
+	true
+)
+
+
+	// schema, isValidating = false, isAsync = false, func
+
+f1 = function (num) {
+
+	return num
+}
+
+var obj = {
+	a: 1,
+	b: Schema.f(
+
+		S({
+			type: 'array',
+			items: [
+				S({
+					type: 'integer',
+					maximum: 1000
+				})
+			]
+		}),
+
+		f1
+
+	)
+}
+
+a(
+	f1 === obj.b,
+	true
+)
+
+a(
+	obj.b.SCHEMA instanceof Schema,
+	true
+)
+
+a(
+	obj.b.IS_VALIDATING,
+	false
+)
+
+a(
+	obj.b.IS_ASYNC,
+	false
+)
+
+
+	// schema, isValidating = true, isAsync = false, isfunc
+
+var obj = {
+	a: 1,
+	b: Schema.f(
+
+		S({
+			type: 'array',
+			items: [
+				S({
+					type: 'integer',
+					maximum: 1000
+				})
+			]
+		}),
+
+		true,
+
+		function (num) {
+
+			return num
+		}
+
+	)
+}
+
+a(
+	f1 === obj.b,
+	false
+)
+
+a(
+	obj.b.SCHEMA instanceof Schema,
+	true
+)
+
+a(
+	obj.b.IS_VALIDATING,
+	true
+)
+
+a(
+	obj.b.IS_ASYNC,
+	false
+)
+
+r = undefined
+try {
+
+	r = obj.b(1001)
+}
+catch (e) {
+
+	a(
+		e instanceof Error,
+		true
+	)
+
+	a(
+		r,
+		undefined
+	)
+}
+
+
+	// schema, isValidating = true, isAsync = true, isfunc
+
+var obj = {
+	a: 1,
+	b: Schema.f(
+
+		S({
+			type: 'array',
+			items: [
+				S({
+					type: 'integer',
+					maximum: 1000
+				})
+			]
+		}),
+
+		true,
+		true,
+
+		function (num, _cb) {
+
+			_cb(num)
+		}
+
+	)
+}
+
+a(
+	f1 === obj.b,
+	false
+)
+
+a(
+	obj.b.SCHEMA instanceof Schema,
+	true
+)
+
+a(
+	obj.b.IS_VALIDATING,
+	true
+)
+
+a(
+	obj.b.IS_ASYNC,
+	true
+)
+
+obj.b(1001, function (e, r) {
+
+	a(
+		e instanceof Error,
+		true
+	)
+
+	a(
+		r,
+		undefined
+	)
+})
+
+
+
+
+console.log('Passed');

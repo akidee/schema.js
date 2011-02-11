@@ -1,11 +1,11 @@
 // schema.js - index - Copyright Andreas Kalsch <andreaskalsch@gmx.de> (MIT Licensed)
 
- 
- 
+
+
 
 i18n = require('./i18n');
-require('underscorex');
-require('underscorex/object');
+var _ = require('underscorex');
+require('underscorex/object')(_);
 
 
 
@@ -655,7 +655,7 @@ _.extend(Validation, {
 					_.clone(toPath),
 					fromPath[0] === '#'
 						? _.clone(fromPath)
-						: ['__Schema', 'instances'].concat(fromPath)
+						: ['#', 'constructor', 'instances'].concat(fromPath)
 				);
 			}
 			
@@ -815,13 +815,16 @@ _.extend(Schema, {
 
 	create: function (rawSchema) {
 
-		try {
+		if (typeof rawSchema === 'string') {
+		
+			try {
 
-			var json = JSON.parse(JSON.stringify(rawSchema));
-		}
-		catch (e) {
+				var json = JSON.parse(rawSchema);
+			}
+			catch (e) {
 
-			throw new Error('The raw schema cannot be stringified as JSON');
+				throw new Error('The raw schema cannot be parsed');
+			}
 		}
 	
 		var validation = Schema.instances.jsonSchemaCore.validate(rawSchema);
@@ -859,6 +862,87 @@ _.extend(Schema, {
 
 			_.resolveRefs(this.instances[id], true);
 		}
+	},
+
+	validateCall: function (func, context) {
+
+		if (!(func.SCHEMA instanceof Schema)) throw 'No SCHEMA defined';
+		
+	
+		var v = func.SCHEMA.validate(slice.call(arguments, 2)),
+			args = v.instance;
+		if (v.isError()) throw v.getError();
+		
+		
+		return func.apply(context, args);
+	},
+
+	validateCallAsync: function (func, context) {
+
+		if (!(func.SCHEMA instanceof Schema)) throw 'No SCHEMA defined';
+		
+	
+		var args = slice.call(arguments, 2),
+			_cb = args.pop(),
+			v = func.SCHEMA.validate(args),
+			args = v.instance;
+		if (v.isError()) return _cb(v.getError());
+		
+		
+		args.push(_cb);
+		func.apply(context, args);
+	},
+
+	/*validateConstruction: function () {}*/
+
+	f: function (schema/* ? */, isValidating/* ? */, isAsync/* ? */, func) {
+
+		var args = slice.call(arguments),
+			func = args.pop()
+
+		if (args.length === 0) {
+
+			func.IS_ASYNC = false
+			return func
+		}
+		
+
+		if (schema instanceof Object) {
+
+			var isValidating = !!args[1],
+				schema = Schema.create(schema),
+				isAsync = !!args[2]
+
+			func.SCHEMA = schema
+			func.IS_VALIDATING = isValidating
+			func.IS_ASYNC = isAsync
+
+			if (isValidating) {
+
+				var func_ = func
+
+				if (!isAsync)
+					func = function () {
+
+						return Schema.validateCall.apply(Schema, [func_, this].concat(slice.call(arguments)))
+					}
+				else
+					func = function () {
+
+						return Schema.validateCallAsync.apply(Schema, [func_, this].concat(slice.call(arguments)))
+					}
+			}
+
+			func.SCHEMA = schema
+			func.IS_VALIDATING = isValidating
+			func.IS_ASYNC = isAsync
+		}
+		else {
+
+			func.IS_ASYNC = !!args[0]
+		}
+
+		return func;
 	}
 });
 
@@ -932,62 +1016,4 @@ if (validation.isError()) {
 
 
 
-_.mixin({
-	
-	validateCall: function (func, context) {
-
-		if (!(func.SCHEMA instanceof Schema)) throw 'No SCHEMA defined';
-		
-	
-		var v = func.SCHEMA.validate(slice.call(arguments, 2)),
-			args = v.instance;
-		if (v.isError()) throw v.getError();
-		
-		
-		return func.apply(context, args);
-	},
-
-	validateCallAsync: function (func, context) {
-
-		if (!(func.SCHEMA instanceof Schema)) throw 'No SCHEMA defined';
-		
-	
-		var args = slice.call(arguments, 2),
-			_cb = args.pop(),
-			v = func.SCHEMA.validate(args),
-			args = v.instance;
-		if (v.isError()) return _cb(v.getError());
-		
-		
-		args.push(_cb);
-		func.apply(context, args);
-	},
-
-	/*validateConstruction: function () {}*/
-
-	f: function (schema/* ? */, validate/* ? */, isAsync/* ? */, func) {
-
-		var args = slice.call(arguments),
-			func = args.pop()
-
-		if (schema instanceof Object) {
-		
-			func.SCHEMA = Schema.create(schema)
-			func.IS_VALIDATING = !!args[1]
-			func.IS_ASYNC = !!args[2]
-		}
-		else {
-
-			func.IS_VALIDATING = false
-			func.IS_ASYNC = !!args[1]
-		}
-
-		return func;
-	}
-});
-
-
-
-
-/// _ ?
-global.__Schema = module.exports = Schema;
+module.exports = Schema;
