@@ -1,6 +1,6 @@
-i18n = require('../i18n');
-require('underscorex');
-require('underscorex/object');
+var i18n = require('../i18n'),
+	_ = require('underscorex');
+require('underscorex/object')(_);
 
 
 module.exports = {

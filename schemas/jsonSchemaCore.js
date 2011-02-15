@@ -24,7 +24,7 @@ module.exports = {
 			minItems: 2,
 			optional: true,
 			"default": "any",
-				adapters: 'addToRefs',
+				pre: 'addToRefs',
 				labels: {
 				
 					de: {
@@ -59,7 +59,7 @@ module.exports = {
 			description: "This indicates that the instance property in the instance object is not required.",
 			optional: true,
 			"default": false,
-				adapters: 'addToRefs'
+				pre: 'addToRefs'
 		},
 		
 		enum: {
@@ -75,7 +75,7 @@ module.exports = {
 			type: "string",
 			optional: true,
 			description: "This provides a description of the purpose the instance property. The value can be a string or it can be an object with properties corresponding to various different instance languages (with an optional default property indicating the default description).",
-				adapters: 'addToRefs'
+				pre: 'addToRefs'
 		},
 		
 		title: {
@@ -83,14 +83,14 @@ module.exports = {
 			type: "string",
 			optional: true,
 			description: "This provides the title of the property",
-				adapters: 'addToRefs'
+				pre: 'addToRefs'
 		},
 		
 		"default": {
 			type: "any",
 			optional: true,
 			description: "This indicates the default for the instance property.",
-				adapters: 'addToRefs'
+				pre: 'addToRefs'
 		},
 		
 		// should go with enum
@@ -110,7 +110,7 @@ module.exports = {
 					}
 				}
 			},
-				adapters: 'addToRefs'
+				pre: 'addToRefs'
 		},
 		
 		extends: {
@@ -122,7 +122,7 @@ module.exports = {
 			//extends: {"$ref": "#"},
 			type: 'object',
 			optional: true,
-				adapters: 'addToRefs'
+				pre: 'addToRefs'
 		},
 		
 		// must be in object
@@ -132,7 +132,7 @@ module.exports = {
 			additionalProperties: {"$ref": "#"},
 			optional: true,
 			description: "indicates a required property or a schema that must be validated if this property is present",
-				adapters: 'addToRefs'
+				pre: 'addToRefs'
 		},
 		
 			// just for schema schemas ;)
@@ -144,7 +144,7 @@ module.exports = {
 				nonStandard: true
 			},
 		
-			adapters: {
+			pre: {
 		
 				// Allow closures
 				type: ['string', 'array', 'any'],
@@ -155,7 +155,7 @@ module.exports = {
 				optional: true,
 				description: "One or several adapters identified by plugin IDs",
 				nonStandard: true,
-					adapters: 'addToRefs'
+					pre: 'addToRefs'
 			},
 			
 			fallbacks: {
@@ -168,7 +168,7 @@ module.exports = {
 				},
 				description: "Fallback object, with property names = schema property names",
 				nonStandard: true,
-					adapters: 'addToRefs'
+					pre: 'addToRefs'
 			},
 			
 		
@@ -182,7 +182,7 @@ module.exports = {
 			description: "This is a definition for the properties of an object value",
 			optional: true,
 			"default": {},
-				adapters: 'addToRefs'
+				pre: 'addToRefs'
 		},
 		
 		
@@ -196,7 +196,7 @@ module.exports = {
 			items: {"$ref": "#"},
 			description: "When the value is an array, this indicates the schema to use to validate each item in an array",
 			optional: true,
-				adapters: [
+				pre: [
 					'instantiateSchema',
 					'addToRefs'
 				]
@@ -208,7 +208,7 @@ module.exports = {
 			optional: true,
 			description: "When the instance value is an array, this indicates maximum number of items.",
 			minimum: 0,
-			adapters: 'addToRefs'
+			pre: 'addToRefs'
 		},
 		
 		minItems: {
@@ -217,7 +217,7 @@ module.exports = {
 			optional: true,
 			description: "When the instance value is an array, this indicates minimum number of items.",
 			minimum: 0,
-				adapters: 'addToRefs'
+				pre: 'addToRefs'
 		},
 		
 		
@@ -231,7 +231,7 @@ module.exports = {
 			description: "This provides a default property definition for all properties that are not explicitly defined in an object type definition.",
 			optional: true,
 			"default": true,
-				adapters: [
+				pre: [
 					'instantiateSchema',
 					'addToRefs'
 				]
@@ -246,7 +246,7 @@ module.exports = {
 			type: "number",
 			optional: true,
 			description: "This indicates the minimum value for the instance property when the type of the instance value is a number.",
-				adapters: 'addToRefs'
+				pre: 'addToRefs'
 		},
 		
 		minimumCanEqual: {
@@ -255,7 +255,7 @@ module.exports = {
 			optional: true,
 			description: "If the minimum is defined, this indicates whether or not the instance property value can equal the minimum.",
 			"default": true,
-				adapters: 'addToRefs'
+				pre: 'addToRefs'
 		},
 		
 		maximum: {
@@ -263,7 +263,7 @@ module.exports = {
 			type: "number",
 			optional: true,
 			description: "This indicates the maximum value for the instance property when the type of the instance value is a number.",
-				adapters: 'addToRefs'
+				pre: 'addToRefs'
 		},
 		
 		maximumCanEqual: {
@@ -272,7 +272,7 @@ module.exports = {
 			optional: true,
 			description: "If the maximum is defined, this indicates whether or not the instance property value can equal the maximum.",
 			"default": true,
-				adapters: 'addToRefs'
+				pre: 'addToRefs'
 		},
 		
 		maxDecimal: {
@@ -280,7 +280,7 @@ module.exports = {
 			type: "integer",
 			optional: true,
 			description: "This indicates the maximum number of decimal places in a floating point number.",
-				adapters: 'addToRefs'
+				pre: 'addToRefs'
 		},
 		
 		
@@ -294,7 +294,7 @@ module.exports = {
 			format: "regex",
 			description: "When the instance value is a string, this provides a regular expression that a instance string value should match in order to be valid.",
 			optional: true,
-				adapters: [
+				pre: [
 					'addToRefs',
 					function (instance, walker) {
 				
@@ -311,7 +311,7 @@ module.exports = {
 			type: "number",
 			optional: true,
 			description: "When the instance value is a string, this indicates maximum length of the string.",
-				adapters: 'addToRefs'
+				pre: 'addToRefs'
 		},
 		
 		minLength: {
@@ -319,7 +319,7 @@ module.exports = {
 			type: "number",
 			optional: true,
 			description: "When the instance value is a string, this indicates minimum length of the string.",
-			adapters: 'addToRefs'
+			pre: 'addToRefs'
 		},
 		
 		
@@ -330,12 +330,12 @@ module.exports = {
 			type: "string",
 			optional: true,
 			description: "This indicates what format the data is among some predefined formats which may include:\n\ndate - a string following the ISO format \naddress \nschema - a schema definition object \nperson \npage \nhtml - a string representing HTML",
-			adapters: 'addToRefs'
+			pre: 'addToRefs'
 		}
 	},
 	
-	adapters: [
+	pre: [
 		'instantiateSchema',
 		'addToRefs'
 	]
-};
+}

@@ -6,7 +6,7 @@
 var assert = require('assert'),
 	a = assert.strictEqual,
 	d = assert.deepEqual,
-	Schema = require('schema');
+	Schema = require('schema')
 
 
 
@@ -14,10 +14,10 @@ var assert = require('assert'),
 // example 1) from README.markdown
 
 // mySchema instanceof Schema === true
-var mySchema = Schema.create({type:'integer'});
+var mySchema = Schema.create({type:'integer'})
 
 // validation instanceof Schema.Validation === true
-var validation = mySchema.validate(5);
+var validation = mySchema.validate(5)
 
 
 // example 2) from README.markdown:
@@ -40,10 +40,10 @@ var result, errors, schema = Schema.create({
             type: 'string',
             enum: ['en', 'de', 'fr'],
             'default': 'en',
-            adapters: function (value) {
+            pre: function (value) {
 
-                if (typeof value === 'object') return value;
-                return String(value).toLowerCase();
+                if (typeof value === 'object') return value
+                return String(value).toLowerCase()
             }
         },
 
@@ -74,14 +74,14 @@ var result, errors, schema = Schema.create({
     },
 
     additionalProperties: false
-});
+})
 
 validation = schema.validate({
 
     q: 'OK',
     start: -5,
     num: -100.99
-});
+})
 
 assert.deepEqual(
     validation.instance,
@@ -92,29 +92,29 @@ assert.deepEqual(
         order: 'date',
         hl: 'en'
     }
-);
+)
 
 assert.strictEqual(
     validation.isError(),
     false
-);
+)
 
 
 
-var v;
+var v
 
 function S (schema) {
 
-	var s = Schema.create(schema);
+	var s = Schema.create(schema)
 	
 	// To test checkers only, use strict fallbacks
-	return s.setFallbacks(Schema.Validation.STRICT_FALLBACKS);
-};
+	return s.setFallbacks(Schema.Validation.STRICT_FALLBACKS)
+}
 
 function V (schema, instance) {
 
-	return S(schema).validate(instance);
-};
+	return S(schema).validate(instance)
+}
 
 
 
@@ -124,17 +124,17 @@ function V (schema, instance) {
 a(
 	new Schema.Validation.Error instanceof Schema.Validation.Error,
 	true
-);
+)
 
 a(
 	new Schema.Validation.Error instanceof Error,
 	true
-);
+)
 
 a(
 	(new Schema.Validation.Error).message,
 	''
-);
+)
 
 
 
@@ -144,175 +144,175 @@ a(
 
 	// optional
 
-v = V({type:'any'}, undefined);
+v = V({type:'any'}, undefined)
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'optional'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 a(
 	v.instance,
 	undefined
-);
+)
 
-v = V({type:'any'}, 1);
+v = V({type:'any'}, 1)
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 a(
 	v.instance,
 	1
-);
+)
 
-v = V({type:'any',optional:true}, undefined);
+v = V({type:'any',optional:true}, undefined)
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 a(
 	v.instance,
 	undefined
-);
+)
 
 
-	// adapters
+	// pre
 	
 Schema.Validation.plugins.strToArray = function (instance) {
 
 	if (typeof instance !== 'string') {
 	
-		this.pushError('strToArray');
-		return instance;
+		this.pushError('strToArray')
+		return instance
 	}
 	
-	return instance.split(',');
-};
+	return instance.split(',')
+}
 
 v = V({
 	type:'array',
-	adapters: 'strToArray'
-}, 'a,b');
+	pre: 'strToArray'
+}, 'a,b')
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	['a', 'b']
-);
+)
 
 v = V({
 	type:'string',
-	adapters: [
+	pre: [
 		'strToArray',
 		function (instance) {
 
 			if (!(instance instanceof Array)) {
 			
-				this.pushError('filter');
-				return instance;
+				this.pushError('filter')
+				return instance
 			}
 			
-			return instance.join('.');
+			return instance.join('.')
 		}
 	]
-}, 'a,b');
+}, 'a,b')
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	'a.b'
-);
+)
 
 v = V({
 	type:'string',
-	adapters: [
+	pre: [
 		'strToArray',
 		'strToArray'
 	]
-}, 'a,b');
+}, 'a,b')
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'strToArray'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	['a', 'b']
-);
+)
 
 
 	// type
@@ -322,51 +322,51 @@ d(
 		
 v = V({
 	type:'null'
-}, null);
+}, null)
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	null
-);
+)
 
 v = V({
 	type:'null'
-}, 1);
+}, 1)
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'type'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	1
-);
+)
 
 
 
@@ -374,206 +374,206 @@ d(
 
 v = V({
 	type:'array'
-}, []);
+}, [])
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	[]
-);
+)
 
 v = V({
 	type:'array'
-}, '');
+}, '')
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'type'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	''
-);
+)
 
 v = V({
 	type:'array',
 	minItems: 2
-}, [1,2]);
+}, [1,2])
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	[1,2]
-);
+)
 
 v = V({
 	type:'array',
 	minItems: 3
-}, [1,2]);
+}, [1,2])
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'minItems'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	[1,2]
-);
+)
 
 v = V({
 	type:'array',
 	maxItems: 2
-}, [1,2]);
+}, [1,2])
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	[1,2]
-);
+)
 
 v = V({
 	type:'array',
 	maxItems: 1,
 	fallbacks: {maxItems:'pushError'}
-}, [1,2]);
+}, [1,2])
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'maxItems'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	[1,2]
-);
+)
 
 v = V({
 	type:'array',
 	items: S({
 		type:'integer'
 	})
-}, [1,2]);
+}, [1,2])
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	[1,2]
-);
+)
 
 v = V({
 	type:'array',
 	items: S({
 		type:'string'
 	})
-}, [1,2]);
+}, [1,2])
 
 a(
 	v.errors.length,
 	2
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'type'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[0]
-);
+)
 
 d(
 	v.instance,
 	[1,2]
-);
+)
 
 v = V({
 	type:'array',
@@ -581,27 +581,27 @@ v = V({
 		type:'integer'
 	}),
 	additionalProperties:false
-}, [1,2]);
+}, [1,2])
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	[1,2]
-);
+)
 
 v = V({
 	type:'array',
@@ -613,27 +613,27 @@ v = V({
 			type:'boolean'
 		})
 	]
-}, ['',false,9]);
+}, ['',false,9])
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	['',false,9]
-);
+)
 
 v = V({
 	type:'array',
@@ -645,27 +645,27 @@ v = V({
 			type:'boolean'
 		})
 	]
-}, [9,false,9]);
+}, [9,false,9])
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'type'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[0]
-);
+)
 
 d(
 	v.instance,
 	[9,false,9]
-);
+)
 
 v = V({
 	type:'array',
@@ -678,27 +678,27 @@ v = V({
 		})
 	],
 	additionalProperties: false
-}, ['',false]);
+}, ['',false])
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	['',false]
-);
+)
 
 v = V({
 	type:'array',
@@ -711,27 +711,27 @@ v = V({
 		})
 	],
 	additionalProperties: false
-}, ['',false,1]);
+}, ['',false,1])
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'additionalProperties'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	['',false,1]
-);
+)
 
 v = V({
 	type:'array',
@@ -744,27 +744,27 @@ v = V({
 		})
 	],
 	additionalProperties: true
-}, ['',false,1]);
+}, ['',false,1])
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	['',false,1]
-);
+)
 
 v = V({
 	type:'array',
@@ -779,27 +779,27 @@ v = V({
 	additionalProperties: S({
 		type: 'integer'
 	})
-}, ['',false,1]);
+}, ['',false,1])
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	['',false,1]
-);
+)
 
 v = V({
 	type:'array',
@@ -814,27 +814,27 @@ v = V({
 	additionalProperties: S({
 		type: 'integer'
 	})
-}, ['',false,'1']);
+}, ['',false,'1'])
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'type'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[2]
-);
+)
 
 d(
 	v.instance,
 	['',false,'1']
-);
+)
 
 
 
@@ -843,51 +843,51 @@ d(
 
 v = V({
 	type:'object'
-}, {});
+}, {})
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	[]
-);
+)
 
 v = V({
 	type:'object'
-}, '');
+}, '')
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'type'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 a(
 	v.instance,
 	''
-);
+)
 
 v = V({
 	type:'object',
@@ -898,27 +898,27 @@ v = V({
 			type: 'integer'
 		})
 	}
-}, {a:1});
+}, {a:1})
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	{a:1}
-);
+)
 
 v = V({
 	type:'object',
@@ -929,27 +929,27 @@ v = V({
 			type: 'integer'
 		})
 	}
-}, {a:false});
+}, {a:false})
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'type'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	['a']
-);
+)
 
 d(
 	v.instance,
 	{a:false}
-);
+)
 
 v = V({
 	type:'object',
@@ -960,27 +960,27 @@ v = V({
 			type: 'integer'
 		})
 	}
-}, {});
+}, {})
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'optional'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	['a']
-);
+)
 
 d(
 	v.instance,
 	{}
-);
+)
 
 v = V({
 	type:'object',
@@ -992,27 +992,27 @@ v = V({
 		})
 	},
 	additionalProperties: false
-}, {a:1});
+}, {a:1})
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	{a:1}
-);
+)
 
 v = V({
 	type:'object',
@@ -1024,27 +1024,27 @@ v = V({
 		})
 	},
 	additionalProperties: false
-}, {a:1,b:1});
+}, {a:1,b:1})
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'additionalProperties'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	{a:1,b:1}
-);
+)
 
 v = V({
 	type:'object',
@@ -1056,504 +1056,504 @@ v = V({
 		})
 	},
 	additionalProperties: true
-}, {a:1,b:1});
+}, {a:1,b:1})
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	{a:1,b:1}
-);
+)
 
 
 		// number
 		
 v = V({
 	type:'number'
-}, '5');
+}, '5')
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'type'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	'5'
-);
+)
 
 v = V({
 	type:'number'
-}, 5);
+}, 5)
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	5
-);
+)
 
 v = V({
 	type:'number',
 	minimum: 10
-}, 5);
+}, 5)
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'minimum'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	5
-);
+)
 
 v = V({
 	type:'number',
 	minimum: 10
-}, 10);
+}, 10)
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	10
-);
+)
 
 v = V({
 	type:'number',
 	maximum: 2
-}, 5);
+}, 5)
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'maximum'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	5
-);
+)
 
 v = V({
 	type:'number',
 	maximum: 12
-}, 10);
+}, 10)
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	10
-);
+)
 
 v = V({
 	type:'number',
 	maxDecimal:2
-}, 10.12);
+}, 10.12)
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	10.12
-);
+)
 
 
 v = V({
 	type:'number',
 	maxDecimal:1
-}, 10.12);
+}, 10.12)
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'maxDecimal'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	10.12
-);
+)
 
 v = V({
 	type:'integer'
-}, 1.2);
+}, 1.2)
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'type'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	1.2
-);
+)
 
 v = V({
 	type:'integer'
-}, 1.0);
+}, 1.0)
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	1
-);
+)
 
 v = V({
 	type:'integer',
 	maxDecimal:-1
-}, 10);
+}, 10)
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	10
-);
+)
 
 v = V({
 	type:'integer',
 	maxDecimal:-1
-}, 11);
+}, 11)
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'maxDecimal'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	11
-);
+)
 
 
 		// string
 		
 v = V({
 	type:'string'
-}, 11);
+}, 11)
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'type'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	11
-);
+)
 
 v = V({
 	type:'string',
 	pattern:/[a-z]/
-}, '_ _');
+}, '_ _')
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'pattern'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	'_ _'
-);
+)
 
 v = V({
 	type:'string',
 	pattern:/[a-z]/
-}, 'mdg');
+}, 'mdg')
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	'mdg'
-);
+)
 
 v = V({
 	type:'string',
 	minLength: 1
-}, '');
+}, '')
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'minLength'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	''
-);
+)
 
 v = V({
 	type:'string',
 	minLength: 2
-}, 'aa');
+}, 'aa')
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	'aa'
-);
+)
 
 v = V({
 	type:'string',
 	maxLength: 2
-}, 'aaa');
+}, 'aaa')
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'maxLength'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 d(
 	v.instance,
 	'aaa'
-);
+)
 
 v = V({
 	type:'string',
 	maxLength: 2
-}, 'aa');
+}, 'aa')
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	'aa'
-);
+)
 
 
 
@@ -1561,51 +1561,51 @@ d(
 
 v = V({
 	type:'boolean'
-}, false);
+}, false)
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 a(
 	v.instance,
 	false
-);
+)
 
 v = V({
 	type:'boolean'
-}, 'false');
+}, 'false')
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'type'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 a(
 	v.instance,
 	'false'
-);
+)
 
 
 
@@ -1614,77 +1614,77 @@ a(
 v = V({
 	type:'string',
 	enum: ['a', 'b', 'c']
-}, 'd');
+}, 'd')
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'enum'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	[]
-);
+)
 
 a(
 	v.instance,
 	'd'
-);
+)
 
 v = V({
 	type:'string',
 	enum: ['a', 'b', 'c']
-}, 'a');
+}, 'a')
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 a(
 	v.instance,
 	'a'
-);
+)
 
 v = V({
 	type:'string',
 	requires: 'a'
-}, 'a');
+}, 'a')
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 a(
 	v.instance,
 	'a'
-);
+)
 
 v = V({
 	type:'object',
@@ -1697,27 +1697,27 @@ v = V({
 			optional: true
 		})
 	}
-}, {});
+}, {})
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	{}
-);
+)
 
 v = V({
 	type:'object',
@@ -1736,27 +1736,27 @@ v = V({
 			optional: true
 		}
 	}
-}, {a:1});
+}, {a:1})
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'optional'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	['b']
-);
+)
 
 d(
 	v.instance,
 	{a:1}
-);
+)
 
 v = V({
 	type:'object',
@@ -1775,27 +1775,27 @@ v = V({
 			optional: true
 		}
 	}
-}, {a:1,b:1});
+}, {a:1,b:1})
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 d(
 	v.instance,
 	{a:1,b:1}
-);
+)
 
 var s = S({
 
@@ -1812,14 +1812,14 @@ var s = S({
 			type: 'array'
 		}
 	},
-	adapters: function (instance) {
+	pre: function (instance) {
 	
-		instance.done = true;
-		return instance;
+		instance.done = true
+		return instance
 	},
 	optional: true
-});
-s.properties.related.items = s;
+})
+s.properties.related.items = s
 
 var i = {
 	word: 'green',
@@ -1829,25 +1829,25 @@ var i = {
 			word: 'red'
 		}
 	]
-};
-i.related[0].related = [i];
+}
+i.related[0].related = [i]
 
-v = V(s, i);
+v = V(s, i)
 
 a(
 	v.errors.length,
 	0
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	''
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	''
-);
+)
 
 // Will break deepEqual - http://github.com/ry/node/issues/issue/207
 // But if script finishes without this check, my validation has detected the recursion
@@ -1861,8 +1861,8 @@ d(
 		}
 	],
 	done: 1
-};
-i.related[0].related = i;
+}
+i.related[0].related = i
 
 /*d(
 	v.instance,
@@ -1877,25 +1877,25 @@ i = {
 			word: ''
 		}
 	]
-};
-i.related[0].related = [i];
+}
+i.related[0].related = [i]
 
-v = V(s, i);
+v = V(s, i)
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'minLength'
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : '',
 	['related', 0, 'word']
-);
+)
 
 
 	// getError
@@ -1903,12 +1903,12 @@ d(
 a(
 	v.getError() instanceof Error,
 	true
-);
+)
 
 d(
 	v.getError().errors,
 	v.errors
-);
+)
 
 
 
@@ -1924,19 +1924,19 @@ v = Schema.instances.jsonSchemaCore.validate({
 	
 		a: {$ref:'#'}
 	}
-});
+})
 
-Schema.resolveRefs();
+Schema.resolveRefs()
 
 a(
 	v.instance instanceof Schema,
 	true
-);
+)
 
 a(
 	v.instance.properties.a instanceof Schema,
 	true
-);
+)
 
 
 	// resolve refs - by ID
@@ -1948,19 +1948,19 @@ v = Schema.instances.jsonSchemaCore.validate({
 	
 		a: {$ref:'xyz'}
 	}
-});
+})
 
-Schema.resolveRefs();
+Schema.resolveRefs()
 
 a(
 	v.instance instanceof Schema,
 	true
-);
+)
 
 a(
 	v.instance.properties.a instanceof Schema,
 	true
-);
+)
 
 
 	// extends
@@ -1975,24 +1975,24 @@ v = Schema.instances.jsonSchemaCore.validate({
 		}
 	},
 	extends:{$ref:'xyz'}
-});
+})
 
-Schema.resolveRefs();
+Schema.resolveRefs()
 
 a(
 	v.instance instanceof Schema,
 	true
-);
+)
 
 a(
 	v.instance.extends instanceof Schema,
 	true
-);
+)
 
 a(
 	v.instance.properties.b instanceof Schema,
 	true
-);
+)
 
 
 
@@ -2006,26 +2006,26 @@ v = Schema.create({
 	
 		a: {$ref:'xyz'}
 	}
-});
+})
 
-Schema.resolveRefs();
+Schema.resolveRefs()
 
 a(
 	v instanceof Schema,
 	true
-);
+)
 
 a(
 	v.properties.a instanceof Schema,
 	true
-);
+)
 
 
 
 
 // Complex example
 
-Schema.prototype.setFallbacks(Schema.TOLERANT_FALLBACKS);
+Schema.prototype.setFallbacks(Schema.TOLERANT_FALLBACKS)
 
 var result, errors, schema = Schema.create({
 
@@ -2046,10 +2046,10 @@ var result, errors, schema = Schema.create({
 			type: 'string',
 			enum: ['en', 'de', 'fr'],
 			'default': 'en',
-			adapters: function (value) {
+			pre: function (value) {
 			
-				if (typeof value === 'object') return value;
-				return String(value).toLowerCase();
+				if (typeof value === 'object') return value
+				return String(value).toLowerCase()
 			}
 		},
 		
@@ -2080,14 +2080,14 @@ var result, errors, schema = Schema.create({
 	},
 	
 	additionalProperties: false
-});
+})
 
 validation = schema.validate({
 
 	q: 'OK',
 	start: -5,
 	num: -100.99
-});
+})
 
 assert.deepEqual(
 	validation.instance,
@@ -2098,12 +2098,12 @@ assert.deepEqual(
 		order: 'date',
 		hl: 'en'
 	}
-);
+)
 
 assert.strictEqual(
 	validation.isError(),
 	false
-);
+)
 
 
 // Test, if several schemas will be used for the same object, but an endless recursion is prohibited
@@ -2121,35 +2121,35 @@ var schema = Schema.create({
 		}
 	},
 	optional: true
-});
+})
 
-Schema.resolveRefs();
+Schema.resolveRefs()
 
-var obj = {a:{},b:0};
-var v = schema.validate(obj);
+var obj = {a:{},b:0}
+var v = schema.validate(obj)
 
 a(
 	v.errors.length,
 	0
-);
+)
 
-var obj = {a:1,b:0};
-var v = schema.validate(obj);
+var obj = {a:1,b:0}
+var v = schema.validate(obj)
 
 a(
 	v.errors.length,
 	1
-);
+)
 
 d(
 	v.errors.length ? v.errors[0].path : [],
 	['a']
-);
+)
 
 a(
 	v.errors.length ? v.errors[0].name : '',
 	'type'
-);
+)
 
 
 
@@ -2157,7 +2157,7 @@ a(
 
 function add (a, b) {
 
-	return a + b;
+	return a + b
 }
 
 add.SCHEMA = Schema.create({
@@ -2167,29 +2167,29 @@ add.SCHEMA = Schema.create({
 		type: 'integer'
 	},
 	maxItems: 2
-});
+})
 
 
 a(
 	Schema.validateCall(add, null, 1, 5),
 	6
-);
+)
 
 
 try {
-	Schema.validateCall(add, null, 'abc', 5);
+	Schema.validateCall(add, null, 'abc', 5)
 }
 catch (e) {
 
-	a(e.errors.length, 1);
-	a(e.errors[0].name, 'type');
+	a(e.errors.length, 1)
+	a(e.errors[0].name, 'type')
 }
 
 
 a(
 	Schema.validateCall(add, null, '1.02', 5),
 	6
-);
+)
 
 
 
@@ -2197,7 +2197,7 @@ a(
 
 function addAsync (a, b, _cb) {
 
-	_cb(null, a + b);
+	_cb(null, a + b)
 }
 
 addAsync.SCHEMA = Schema.create({
@@ -2207,20 +2207,20 @@ addAsync.SCHEMA = Schema.create({
 		type: 'integer'
 	},
 	maxItems: 2
-});
+})
 
 Schema.validateCallAsync(addAsync, null, '1.02', 5, 6, function (e, r1) {
 	
 	a(
 		e instanceof Error,
 		false
-	);
+	)
 
 	a(
 		r1,
 		6
-	);
-});
+	)
+})
 
 
 

@@ -3,14 +3,14 @@
 
 
 
-i18n = require('./i18n');
-var _ = require('underscorex');
-require('underscorex/object')(_);
+i18n = require('./i18n')
+var _ = require('underscorex')
+require('underscorex/object')(_)
 
 
 
 
-var slice = Array.prototype.slice;
+var slice = Array.prototype.slice
 
 
 
@@ -19,32 +19,32 @@ function _Error (path, name, message) {
 
 	this.path = path
 		? _.clone(path)
-		: [];
-	this.name = name || '';
-	this.message = message || '';
-};
+		: []
+	this.name = name || ''
+	this.message = message || ''
+}
 
-_Error.prototype = new Error;
+_Error.prototype = new Error
 _Error.prototype.id = function () {
 
-	return [this.path, this.name];
-};
-_Error.prototype.constructor = _Error;
+	return [this.path, this.name]
+}
+_Error.prototype.constructor = _Error
 
 
 
 
 /*Error.prototype.toSimpleString = function () {
 
-	var s = [this.message+':'];
+	var s = [this.message+':']
 	if (this.errors instanceof Array) {
 
 		this.errors.forEach(function (e) {
 
-			s.push("\t"+e.path.join(', ')+': '+e.message);
-		});
+			s.push("\t"+e.path.join(', ')+': '+e.message)
+		})
 	}
-	return s.join("\n");
+	return s.join("\n")
 };*/
 
 
@@ -52,37 +52,37 @@ _Error.prototype.constructor = _Error;
 
 function Validation (rootSchema, instance, options) {
 
-	options = options || {};
+	options = options || {}
 
-	this.id = Validation._id++;
+	this.id = Validation._id++
 
 	// Save combination of objects/schemas	
-	this._flags = {};
+	this._flags = {}
 	
 	// Unique errors
-	this._errors = {};
+	this._errors = {}
 
-	this._wasError = 0;
+	this._wasError = 0
 	
 	// Stack of schemas
-	this._stack = [];
-	this.push(rootSchema);
+	this._stack = []
+	this.push(rootSchema)
 	
 	// Current path
-	this.path = [];
+	this.path = []
 	
 	/// Relevant?
-	this.rootSchema = rootSchema;
+	this.rootSchema = rootSchema
 	
-	this.locale = options.locale || 'en';
+	this.locale = options.locale || 'en'
 	
 	// Both relevant properties the user is interested in
-	this.errors = [];
-	this.instance = instance;
-	this.instance = this.start(instance);
+	this.errors = []
+	this.instance = instance
+	this.instance = this.start(instance)
 	
-	delete this._flags, this._errors, this._wasError, this._stack;
-};
+	delete this._flags, this._errors, this._wasError, this._stack
+}
 
 _.extend(Validation.prototype, {
 
@@ -93,10 +93,10 @@ _.extend(Validation.prototype, {
 	
 		var id = JSON.stringify(
 			_Error.prototype.id.call({path: this.path, name: name})
-		);
+		)
 		if (!(id in this._errors)) {
 		
-			this._errors[id] = true;
+			this._errors[id] = true
 	
 			this.errors.push(new _Error(
 				this.path,
@@ -104,37 +104,37 @@ _.extend(Validation.prototype, {
 				message instanceof Object
 					? _.locale(message, this.locale)(this)
 					: message
-			));
+			))
 		}
-		this._wasError++;
+		this._wasError++
 	},
 	
 	wasError: function () {
 	
-		var was = this._wasError;
-		this._wasError = 0;
-		return was;
+		var was = this._wasError
+		this._wasError = 0
+		return was
 	},
 	
 	isError: function () {
 	
-		return this.errors.length > 0;
+		return this.errors.length > 0
 	},
 
 	getError: function () {
 
 		var e = new Error(
 			_.locale(i18n('validation_error'), this.locale)(this)
-		);
-		e.errors = this.errors;
-		return e;
+		)
+		e.errors = this.errors
+		return e
 	},
 	
 	push: function (schema, key) {
 	
-		this.schema = schema;
-		this._stack.push(schema);
-		if (key !== undefined) this.path.push(key);
+		this.schema = schema
+		this._stack.push(schema)
+		if (key !== undefined) this.path.push(key)
 	},
 	
 	pop: function (omitKey) {
@@ -142,39 +142,39 @@ _.extend(Validation.prototype, {
 		var ret = [
 			this._stack.pop(),
 			omitKey ? undefined : this.path.pop()
-		];
-		var len = this._stack.length;
+		]
+		var len = this._stack.length
 		this.schema = len 
 			? this._stack[len - 1]
-			: null;
-		return ret;
+			: null
+		return ret
 	},
 	
 	getFlag: function (instance) {
 	
-		return _.objectId(instance)+'_'+this.schema.id;
+		return _.objectId(instance)+'_'+this.schema.id
 	},
 	
 	flagObject: function (instance) {
 	
-		this._flags[this.getFlag(instance)] = true;
-		return instance;
+		this._flags[this.getFlag(instance)] = true
+		return instance
 	},
 	
 	isObjectFlagged: function (instance) {
 	
-		return this.getFlag(instance) in this._flags;
+		return this.getFlag(instance) in this._flags
 	},
 	
 	callPlugin: function (plugin, instance) {
 	
 		var args = arguments.length > 2
 			? slice.call(arguments, 1)
-			: [instance];
+			: [instance]
 	
 		if (typeof plugin !== 'function')
-			plugin = Validation.plugins[plugin] || Validation.plugins.pushError;
-		return plugin.apply(this, args);
+			plugin = Validation.plugins[plugin] || Validation.plugins.pushError
+		return plugin.apply(this, args)
 	},
 	
 	
@@ -185,23 +185,23 @@ _.extend(Validation.prototype, {
 		
 		if (instance instanceof Object) {
 		
-			if (this.isObjectFlagged(instance)) return instance;
+			if (this.isObjectFlagged(instance)) return instance
 			
 			
-			this.flagObject(instance);
+			this.flagObject(instance)
 		}
 		
-		instance = this.extends(instance); if (this.wasError()) return instance;
+		instance = this.extends(instance); if (this.wasError()) return instance
 		
-		instance = this.adapters(instance); if (this.wasError()) return instance;
+		instance = this.pre(instance); if (this.wasError()) return instance
 
-		instance = this.optional(instance); if (this.wasError() || instance === undefined) return instance;
+		instance = this.optional(instance); if (this.wasError() || instance === undefined) return instance
 		
-		instance = this.type(instance); if (this.wasError()) return instance;
+		instance = this.type(instance); if (this.wasError()) return instance
 		
-		instance = this.requires(instance);
+		instance = this.requires(instance)
 		
-		return instance;
+		return instance
 	},
 	
 	
@@ -209,164 +209,164 @@ _.extend(Validation.prototype, {
 	
 	extends: function (instance) {
 	
-		if (!this.schema.extends) return instance;
+		if (!this.schema.extends) return instance
 		
 		
-		this.push(this.schema.extends);
-		instance = this.start(instance);
-		this.pop(true);
+		this.push(this.schema.extends)
+		instance = this.start(instance)
+		this.pop(true)
 		
-		return instance;
+		return instance
 	},
 	
 	optional: function (instance) {
 
-		if (this.schema.optional || instance !== undefined) return instance;
+		if (this.schema.optional || instance !== undefined) return instance
 		
 		
-		return this.callPlugin(this.schema.fallbacks.optional, instance, 'optional');
+		return this.callPlugin(this.schema.fallbacks.optional, instance, 'optional')
 	},
 		
-	adapters: function (instance) {
+	pre: function (instance) {
 	
-		if (!this.schema.adapters) return instance;
+		if (!this.schema.pre) return instance
 		
 		
-		var adapters = this.schema.adapters;
+		var adapters = this.schema.pre
 		
-		if (!(adapters instanceof Array)) adapters = [adapters];
+		if (!(adapters instanceof Array)) adapters = [adapters]
 
 		var len = this.errors.length,
-			adapter;
+			adapter
 		for (var li = adapters.length, i = 0; i < li; i++) {
 				
-			adapter = adapters[i];
+			adapter = adapters[i]
 				
-			instance = this.callPlugin(adapter, instance);
+			instance = this.callPlugin(adapter, instance)
 				
-			if (this.errors.length > len) return instance;
+			if (this.errors.length > len) return instance
 		}
 		
-		return instance;
+		return instance
 	},
 	
 	type: function (instance, type, isFirst) {
 		
 		isFirst = isFirst === false
 			? false
-			: true;
+			: true
 		
-		var toType = type || this.schema.type;
+		var toType = type || this.schema.type
 		
 		if (!(toType instanceof Array)) {
 	
-			var fromType = typeof instance;
+			var fromType = typeof instance
 			
 			var ok = (function () {
 			
-				if (toType === 'any') return true;
+				if (toType === 'any') return true
 			
-				if (toType === 'null') return instance === null;
+				if (toType === 'null') return instance === null
 				
 				if (toType === 'array') return instance instanceof Array 
-					|| _.isArguments(instance);
+					|| _.isArguments(instance)
 				
-				if (toType === 'object') return instance instanceof Object && !(instance instanceof Array);
+				if (toType === 'object') return instance instanceof Object && !(instance instanceof Array)
 				
-				if (toType === 'number') return fromType === 'number';
+				if (toType === 'number') return fromType === 'number'
 				
-				if (toType === 'integer') return Math.round(instance) === instance;
+				if (toType === 'integer') return Math.round(instance) === instance
 				
-				if (toType === 'string') return fromType === 'string';
+				if (toType === 'string') return fromType === 'string'
 				
-				if (toType === 'boolean') return fromType === 'boolean';
-			})();
+				if (toType === 'boolean') return fromType === 'boolean'
+			})()
 				
 			if (!ok) {
 
-				instance = this.callPlugin(this.schema.fallbacks.type, instance, 'type');
-				if (this.wasError()) return instance;
+				instance = this.callPlugin(this.schema.fallbacks.type, instance, 'type')
+				if (this.wasError()) return instance
 			}
 				
-			var type = typeof instance;
+			var type = typeof instance
 
 			if (type === 'number') {
 			
-				instance = this.minimum(instance); if (this.wasError()) return instance;
+				instance = this.minimum(instance); if (this.wasError()) return instance
 				
-				instance = this.maximum(instance); if (this.wasError()) return instance;
+				instance = this.maximum(instance); if (this.wasError()) return instance
 			
-				instance = this.maxDecimal(instance); if (this.wasError()) return instance;
+				instance = this.maxDecimal(instance); if (this.wasError()) return instance
 				
-				if (isFirst) instance = this.enum(instance);
+				if (isFirst) instance = this.enum(instance)
 				
-				return instance;
+				return instance
 			}
 			
 			if (type === 'string') {
 			
-				instance = this.pattern(instance); if (this.wasError()) return instance;
+				instance = this.pattern(instance); if (this.wasError()) return instance
 				
-				instance = this.minLength(instance); if (this.wasError()) return instance;
+				instance = this.minLength(instance); if (this.wasError()) return instance
 				
-				instance = this.maxLength(instance); if (this.wasError()) return instance;
+				instance = this.maxLength(instance); if (this.wasError()) return instance
 				
-				if (isFirst) instance = this.enum(instance);
+				if (isFirst) instance = this.enum(instance)
 				
-				return instance;
+				return instance
 			}
 			
 			if (instance instanceof Array) {
 			
-				instance = this.minItems(instance); if (this.wasError()) return instance;
+				instance = this.minItems(instance); if (this.wasError()) return instance
 				
-				instance = this.maxItems(instance); if (this.wasError()) return instance;
+				instance = this.maxItems(instance); if (this.wasError()) return instance
 				
-				instance = this.items(instance); if (this.wasError()) return instance;
+				instance = this.items(instance); if (this.wasError()) return instance
 
-				instance = this.additionalProperties(instance); if (this.wasError()) return instance;
+				instance = this.additionalProperties(instance); if (this.wasError()) return instance
 				
-				if (isFirst) instance = this.enum(instance);
+				if (isFirst) instance = this.enum(instance)
 				
-				return instance;
+				return instance
 			}
 			
 			if (instance instanceof Object) {
 			
-				instance = this.properties(instance);
+				instance = this.properties(instance)
 				
-				instance = this.additionalProperties(instance); if (this.wasError()) return instance;
+				instance = this.additionalProperties(instance); if (this.wasError()) return instance
 				
-				if (isFirst) instance = this.enum(instance);
+				if (isFirst) instance = this.enum(instance)
 				
-				return instance;
+				return instance
 			}
 			
-			return instance;
+			return instance
 		}
 		else {
 
 			var inst,
-				len = this.errors.length;
+				len = this.errors.length
 			for (var li = toType.length, i = 0; i < li; i++) {
 		
-				inst = this.type(instance, toType[i], i === 0);
+				inst = this.type(instance, toType[i], i === 0)
 				if (this.errors.length === len) {
 				
-					instance = inst;
-					break;
+					instance = inst
+					break
 				}
 				
 				
 				if (i + 1 < li) {
 
-					this.errors.splice(len);
-					this.wasError();
+					this.errors.splice(len)
+					this.wasError()
 				}
 			}
 		}
 		
-		return instance;
+		return instance
 	},
 	
 	enum: function (instance) {
@@ -376,10 +376,10 @@ _.extend(Validation.prototype, {
 			/// Tolerant ?
 			return this.schema.enum.indexOf(instance) > -1 
 				? instance
-				: this.callPlugin(this.schema.fallbacks.enum, instance, 'enum');
+				: this.callPlugin(this.schema.fallbacks.enum, instance, 'enum')
 		}
 		
-		return instance;
+		return instance
 	},
 	
 	requires: function (instance) {
@@ -388,14 +388,14 @@ _.extend(Validation.prototype, {
 			&& this.parentInstance) {
 
 			/// requires as string will be replaces by schem, like this:
-			var tempSchema;
+			var tempSchema
 			if (typeof this.schema.requires === 'string') {
 			
 				tempSchema = {
 				
 					properties: {}
-				};
-				tempSchema.properties[this.schema.requires] = {type:'any'};
+				}
+				tempSchema.properties[this.schema.requires] = {type:'any'}
 				
 			}
 			else {
@@ -403,22 +403,22 @@ _.extend(Validation.prototype, {
 				tempSchema = {
 			
 					properties: this.schema.requires
-				};
+				}
 			}
 			
-			tempSchema = Schema.create(tempSchema);
+			tempSchema = Schema.create(tempSchema)
 			
-			var schema_key = this.pop();
+			var schema_key = this.pop()
 			
-			this.push(tempSchema);
+			this.push(tempSchema)
 
-			this.properties(this.parentInstance);
+			this.properties(this.parentInstance)
 			
-			this.pop(true);
-			this.push.apply(this, schema_key);
+			this.pop(true)
+			this.push.apply(this, schema_key)
 		}
 		
-		return instance;
+		return instance
 	},
 	
 	properties: function (instance) {
@@ -427,26 +427,26 @@ _.extend(Validation.prototype, {
 	
 			var props = this.schema.properties,
 				prop,
-				inst;
+				inst
 			
-			this.parentInstance = instance;
-			var isIn, inst;
+			this.parentInstance = instance
+			var isIn, inst
 			
 			for (var key in props) {
 
-				this.push(props[key], key);
-				isIn = key in instance;
-				inst = this.start(instance[key]);
+				this.push(props[key], key)
+				isIn = key in instance
+				inst = this.start(instance[key])
 				
-				if (isIn || inst !== undefined) instance[key] = inst;
-				this.pop();
+				if (isIn || inst !== undefined) instance[key] = inst
+				this.pop()
 			}
 			
-			this.parentInstance = null;
+			this.parentInstance = null
 		}
 		
-		this.wasError();
-		return instance;
+		this.wasError()
+		return instance
 	},
 	
 	additionalProperties: function (instance) {
@@ -455,7 +455,7 @@ _.extend(Validation.prototype, {
 	
 			if (instance instanceof Object && !(instance instanceof Array)) {
 			
-				var props = this.schema.properties || {};
+				var props = this.schema.properties || {}
 
 				// this.schema.additionalProperties === false ?
 				if (!this.schema.additionalProperties) {
@@ -466,7 +466,7 @@ _.extend(Validation.prototype, {
 		
 						if (!(key in props)) {
 						
-							return this.callPlugin(this.schema.fallbacks.additionalProperties, instance, 'additionalProperties');
+							return this.callPlugin(this.schema.fallbacks.additionalProperties, instance, 'additionalProperties')
 						}
 					}
 				}
@@ -478,9 +478,9 @@ _.extend(Validation.prototype, {
 		
 						if (!(key in props)) {
 						
-							this.push(this.schema.additionalProperties, key);
-							instance[key] = this.start(instance[key]);
-							this.pop();
+							this.push(this.schema.additionalProperties, key)
+							instance[key] = this.start(instance[key])
+							this.pop()
 						}
 					}
 				}
@@ -491,22 +491,22 @@ _.extend(Validation.prototype, {
 					
 					if (instance.length > this.schema.items.length) {
 					
-						return this.callPlugin(this.schema.fallbacks.additionalProperties, instance, 'additionalProperties');
+						return this.callPlugin(this.schema.fallbacks.additionalProperties, instance, 'additionalProperties')
 					}
 				}
 				else if (this.schema.additionalProperties !== true) {
 					
 					for (var li = instance.length, i = this.schema.items.length; i < li; i++) {
 		
-						this.push(this.schema.additionalProperties, i);
-						instance[i] = this.start(instance[i]);
-						this.pop();
+						this.push(this.schema.additionalProperties, i)
+						instance[i] = this.start(instance[i])
+						this.pop()
 					}
 				}
 			}
 		}
 		
-		return instance;
+		return instance
 	},
 	
 	items: function (instance) {
@@ -515,116 +515,116 @@ _.extend(Validation.prototype, {
 		
 			if (this.schema.items instanceof Array) {
 			
-				var isIn, inst;
+				var isIn, inst
 				for (var li = this.schema.items.length, i = 0; i < li; i++) {
 				
-					this.push(this.schema.items[i], i);
-					isIn = i in instance;
-					inst = this.start(instance[i]);
-					if (isIn || inst !== undefined) instance[i] = inst;
-					this.pop();
+					this.push(this.schema.items[i], i)
+					isIn = i in instance
+					inst = this.start(instance[i])
+					if (isIn || inst !== undefined) instance[i] = inst
+					this.pop()
 				}
 			}
 			else {
 			
 				for (var li = instance.length, i = 0; i < li; i++) {
 				
-					this.push(this.schema.items, i);
-					instance[i] = this.start(instance[i]);
-					this.pop();
+					this.push(this.schema.items, i)
+					instance[i] = this.start(instance[i])
+					this.pop()
 				}
 			}
 		}
 		
-		return instance;
+		return instance
 	},
 	
 	maxItems: function (instance) {
 	
 		return this.schema.maxItems && instance.length > this.schema.maxItems
 			? this.callPlugin(this.schema.fallbacks.maxItems, instance, 'maxItems')
-			: instance;
+			: instance
 	},
 	
 	minItems: function (instance) {
 	
 		return this.schema.minItems && instance.length < this.schema.minItems
 			? this.callPlugin(this.schema.fallbacks.minItems, instance, 'minItems')
-			: instance;
+			: instance
 	},
 	
 	minimum: function (instance) {
 	
-		if (!('minimum' in this.schema)) return instance;
+		if (!('minimum' in this.schema)) return instance
 	
 	
 		var minimumCanEqual = 'minimumCanEqual' in this.schema
 			? this.schema.minimumCanEqual
-			: true;
+			: true
 		return (minimumCanEqual
 			? instance >= this.schema.minimum
 			: instance > this.schema.minimum
 		)
 			? instance
-			: this.callPlugin(this.schema.fallbacks.minimum, instance, 'minimum');
+			: this.callPlugin(this.schema.fallbacks.minimum, instance, 'minimum')
 	},
 	
 	maximum: function (instance) {
 	
-		if (!('maximum' in this.schema)) return instance;
+		if (!('maximum' in this.schema)) return instance
 	
 	
 		var maximumCanEqual = 'maximumCanEqual' in this.schema
 			? this.schema.maximumCanEqual
-			: true;
+			: true
 		return (maximumCanEqual
 			? instance <= this.schema.maximum
 			: instance < this.schema.maximum
 		)
 			? instance
-			: this.callPlugin(this.schema.fallbacks.maximum, instance, 'maximum');
+			: this.callPlugin(this.schema.fallbacks.maximum, instance, 'maximum')
 	},
 	
 	maxDecimal: function (instance) {
 	
 		if ('maxDecimal' in this.schema) {
 		
-			var factor = Math.pow(10, this.schema.maxDecimal);
+			var factor = Math.pow(10, this.schema.maxDecimal)
 			return Math.round(instance * factor) / factor === instance
 				? instance
-				: this.callPlugin(this.schema.fallbacks.maxDecimal, instance, 'maxDecimal');
+				: this.callPlugin(this.schema.fallbacks.maxDecimal, instance, 'maxDecimal')
 		}
 		
-		return instance;
+		return instance
 	},
 	
 	pattern: function (instance) {
 	
-		if (!this.schema.pattern) return instance;
+		if (!this.schema.pattern) return instance
 		
 		return this.schema.pattern.test(instance)
 			? instance
-			: this.callPlugin(this.schema.fallbacks.pattern, instance, 'pattern');
+			: this.callPlugin(this.schema.fallbacks.pattern, instance, 'pattern')
 	},
 	
 	minLength: function (instance) {
 	
-		if (this.schema.minLength === undefined) return instance;
+		if (this.schema.minLength === undefined) return instance
 
 		return instance.length >= this.schema.minLength
 			? instance
-			: this.callPlugin(this.schema.fallbacks.minLength, instance, 'minLength');
+			: this.callPlugin(this.schema.fallbacks.minLength, instance, 'minLength')
 	},
 	
 	maxLength: function (instance) {
 	
-		if (this.schema.maxLength === undefined) return instance;
+		if (this.schema.maxLength === undefined) return instance
 	
 		return instance.length <= this.schema.maxLength
 			? instance
-			: this.callPlugin(this.schema.fallbacks.maxLength, instance, 'maxLength');
+			: this.callPlugin(this.schema.fallbacks.maxLength, instance, 'maxLength')
 	}
-});
+})
 
 _.extend(Validation, {
 
@@ -633,7 +633,7 @@ _.extend(Validation, {
 	
 	addPlugins: function (plugins) {
 	
-		_.extend(Validation.plugins, plugins);
+		_.extend(Validation.plugins, plugins)
 	},
 	
 	plugins: {
@@ -648,7 +648,7 @@ _.extend(Validation, {
 	
 				/// Still no URIs supported
 				var toPath = this.path,
-					fromPath = instance.$ref.split('.');
+					fromPath = instance.$ref.split('.')
 				
 				_.addRef(
 					this.instance,
@@ -656,77 +656,77 @@ _.extend(Validation, {
 					fromPath[0] === '#'
 						? _.clone(fromPath)
 						: ['#', 'constructor', 'instances'].concat(fromPath)
-				);
+				)
 			}
 			
-			return instance;
+			return instance
 		},
 		
 		instantiateSchema: function (instance) {
 			
-			if (!(instance instanceof Object) || instance instanceof Array) return instance;
+			if (!(instance instanceof Object) || instance instanceof Array) return instance
 			
 			
-			var isThisInstance = instance === this.instance;
-			if (!(instance instanceof Schema)) instance = new Schema(instance);
-			if (isThisInstance) this.instance = instance;
+			var isThisInstance = instance === this.instance
+			if (!(instance instanceof Schema)) instance = new Schema(instance)
+			if (isThisInstance) this.instance = instance
 			
 			if (instance.properties instanceof Object) {
 	
-				var props = instance.properties || {};
+				var props = instance.properties || {}
 	
 				for (var key in props) {
 			
 					if (props[key] instanceof Object && !(props[key] instanceof Schema))
-						props[key] = new Schema(props[key]);
+						props[key] = new Schema(props[key])
 				}
 			}
 			
 			if (instance.items instanceof Array) {
 			
-				var items = instance.items;
+				var items = instance.items
 				for (var li = items.length, i = 0; i < li; i++) {
 			
 					if (items[i] instanceof Object && !(items[i] instanceof Schema))
-						items[i] = new Schema(items[i]);
+						items[i] = new Schema(items[i])
 				}
 			}
 			else if (instance.items instanceof Object) {
 			
 				if (!(instance.items instanceof Schema))
-					instance.items = new Schema(instance.items);
+					instance.items = new Schema(instance.items)
 			}
 			
 			if (instance.requires 
 				&& instance.requires instanceof Object
 				&& !(instance.requires instanceof Array)) {
 			
-				var props = instance.requires;
+				var props = instance.requires
 				for (var key in props) {
 				
-					props[key] = new Schema(props[key]);
+					props[key] = new Schema(props[key])
 				}
 			}
 			
 			if (instance.additionalProperties instanceof Object
 				&& !(instance.additionalProperties instanceof Schema)) {
 			
-				instance.additionalProperties = new Schema(instance.additionalProperties);
+				instance.additionalProperties = new Schema(instance.additionalProperties)
 			}
 			
 			if (instance.extends instanceof Object) {
 	
 				if (!(instance.extends instanceof Schema)) {
 				
-					instance.extends = new Schema(instance.extends);
+					instance.extends = new Schema(instance.extends)
 				}
 			}
 			
-			instance.setFallbacks(instance.fallbacks);
+			instance.setFallbacks(instance.fallbacks)
 			
-			_.resetRefs(instance);
+			_.resetRefs(instance)
 			
-			return instance;
+			return instance
 		}
 	},
 	
@@ -763,51 +763,51 @@ _.extend(Validation, {
 		minLength: 'pushError',
 		maxLength: 'pushError'
 	}
-});
+})
 
-Validation.addPlugins(require('./plugins/validation'));
+Validation.addPlugins(require('./plugins/validation'))
 
 
 
 
 function Schema (rawSchema) {
 		
-	if (typeof rawSchema === 'string') rawSchema = JSON.parse(rawSchema);
+	if (typeof rawSchema === 'string') rawSchema = JSON.parse(rawSchema)
 
-	if (rawSchema instanceof Schema) return rawSchema;
+	if (rawSchema instanceof Schema) return rawSchema
 	
 	
-	_.extend(this, rawSchema);
+	_.extend(this, rawSchema)
 	
-	if (this.id === undefined) this.id = ''+Schema._id++;
-	Schema.instances[this.id] = this;
-};
+	if (this.id === undefined) this.id = ''+Schema._id++
+	Schema.instances[this.id] = this
+}
 
 _.extend(Schema.prototype, {
 
 	validate: function (instance) {
 	
-		return new Validation(this, instance);
+		return new Validation(this, instance)
 	},
 
 	setFallbacks: function (fallbacks) {
 	
 		if (typeof fallbacks === 'string') {
 		
-			this.fallbacks = Validation[fallbacks];
+			this.fallbacks = Validation[fallbacks]
 		}
 		else if (fallbacks === undefined) {
 		
-			this.fallbacks = Validation.TOLERANT_FALLBACKS;
+			this.fallbacks = Validation.TOLERANT_FALLBACKS
 		}
 		else {
 		
-			this.fallbacks = _.extend({}, Validation.TOLERANT_FALLBACKS, fallbacks);
+			this.fallbacks = _.extend({}, Validation.TOLERANT_FALLBACKS, fallbacks)
 		}
 		
-		return this;
+		return this
 	}
-});
+})
 
 _.extend(Schema, {
 
@@ -819,23 +819,23 @@ _.extend(Schema, {
 		
 			try {
 
-				var json = JSON.parse(rawSchema);
+				var json = JSON.parse(rawSchema)
 			}
 			catch (e) {
 
-				throw new Error('The raw schema cannot be parsed');
+				throw new Error('The raw schema cannot be parsed')
 			}
 		}
 	
-		var validation = Schema.instances.jsonSchemaCore.validate(rawSchema);
-		if (validation.isError()) throw validation.getError();
+		var validation = Schema.instances.jsonSchemaCore.validate(rawSchema)
+		if (validation.isError()) throw validation.getError()
 		
 
 		validation.toJSON = function () {
 
-			return json;
-		};
-		return validation.instance;
+			return json
+		}
+		return validation.instance
 	},
 	
 	createSeveral: function (schemaDict) {
@@ -843,13 +843,13 @@ _.extend(Schema, {
 		/// Collect ALL errors
 		for (var key in schemaDict) {
 		
-			if (schemaDict[key].id === undefined) schemaDict[key].id = key;
+			if (schemaDict[key].id === undefined) schemaDict[key].id = key
 			
 			
-			schemaDict[key] = this.create(schemaDict[key]);
+			schemaDict[key] = this.create(schemaDict[key])
 		}
 		
-		return schemaDict;
+		return schemaDict
 	},
 
 	instances: {},
@@ -860,37 +860,37 @@ _.extend(Schema, {
 	
 		for (var id in this.instances) {
 
-			_.resolveRefs(this.instances[id], true);
+			_.resolveRefs(this.instances[id], true)
 		}
 	},
 
 	validateCall: function (func, context) {
 
-		if (!(func.SCHEMA instanceof Schema)) throw 'No SCHEMA defined';
+		if (!(func.SCHEMA instanceof Schema)) throw 'No SCHEMA defined'
 		
 	
 		var v = func.SCHEMA.validate(slice.call(arguments, 2)),
-			args = v.instance;
-		if (v.isError()) throw v.getError();
+			args = v.instance
+		if (v.isError()) throw v.getError()
 		
 		
-		return func.apply(context, args);
+		return func.apply(context, args)
 	},
 
 	validateCallAsync: function (func, context) {
 
-		if (!(func.SCHEMA instanceof Schema)) throw 'No SCHEMA defined';
+		if (!(func.SCHEMA instanceof Schema)) throw 'No SCHEMA defined'
 		
 	
 		var args = slice.call(arguments, 2),
 			_cb = args.pop(),
 			v = func.SCHEMA.validate(args),
-			args = v.instance;
-		if (v.isError()) return _cb(v.getError());
+			args = v.instance
+		if (v.isError()) return _cb(v.getError())
 		
 		
-		args.push(_cb);
-		func.apply(context, args);
+		args.push(_cb)
+		func.apply(context, args)
 	},
 
 	/*validateConstruction: function () {}*/
@@ -942,9 +942,9 @@ _.extend(Schema, {
 			func.IS_ASYNC = !!args[0]
 		}
 
-		return func;
+		return func
 	}
-});
+})
 
 
 
@@ -960,60 +960,60 @@ var jsonSchemaCore = require('./schemas/jsonSchemaCore');
  */
 
 (jsonSchemaCore = new Schema(jsonSchemaCore))
-	.setFallbacks(Validation.STRICT_FALLBACKS);
+	.setFallbacks(Validation.STRICT_FALLBACKS)
 
 for (var key in jsonSchemaCore.properties) {
 
 	(jsonSchemaCore.properties[key] = new Schema(jsonSchemaCore.properties[key]))
-		.setFallbacks(Validation.STRICT_FALLBACKS);
+		.setFallbacks(Validation.STRICT_FALLBACKS)
 }
 
 (jsonSchemaCore.properties.type.items = new Schema(jsonSchemaCore.properties.type.items))
-	.setFallbacks(Validation.STRICT_FALLBACKS);
+	.setFallbacks(Validation.STRICT_FALLBACKS)
 	
-jsonSchemaCore.properties.type.items.enum = jsonSchemaCore.properties.type.enum;
+jsonSchemaCore.properties.type.items.enum = jsonSchemaCore.properties.type.enum
 
 jsonSchemaCore.properties.id.pattern = new RegExp(jsonSchemaCore.properties.id.pattern);
 
 (jsonSchemaCore.properties.options.items = new Schema(jsonSchemaCore.properties.options.items))
-	.setFallbacks(Validation.STRICT_FALLBACKS);
+	.setFallbacks(Validation.STRICT_FALLBACKS)
 
 jsonSchemaCore.properties.requires.additionalProperties = jsonSchemaCore;
 
-(jsonSchemaCore.properties.adapters.items = new Schema(jsonSchemaCore.properties.adapters.items))
+(jsonSchemaCore.properties.pre.items = new Schema(jsonSchemaCore.properties.pre.items))
 	.setFallbacks(Validation.STRICT_FALLBACKS);
 
 (jsonSchemaCore.properties.fallbacks.additionalProperties = new Schema(jsonSchemaCore.properties.fallbacks.additionalProperties))
-	.setFallbacks(Validation.STRICT_FALLBACKS);
+	.setFallbacks(Validation.STRICT_FALLBACKS)
 
-jsonSchemaCore.properties.properties.additionalProperties = jsonSchemaCore;
+jsonSchemaCore.properties.properties.additionalProperties = jsonSchemaCore
 
 //Luhmannesk moment
-//jsonSchemaCore.properties.extends.extends = jsonSchemaCore;
+//jsonSchemaCore.properties.extends.extends = jsonSchemaCore
 
-jsonSchemaCore.properties.items.properties = jsonSchemaCore.properties;
+jsonSchemaCore.properties.items.properties = jsonSchemaCore.properties
 
-jsonSchemaCore.properties.items.items = jsonSchemaCore;
+jsonSchemaCore.properties.items.items = jsonSchemaCore
 
-jsonSchemaCore.properties.additionalProperties.properties = jsonSchemaCore.properties;
+jsonSchemaCore.properties.additionalProperties.properties = jsonSchemaCore.properties
 
 /* Now, the core schema should be as if it had validated itself.
  * Check it out:
  */
 
-var validation = jsonSchemaCore.validate(jsonSchemaCore);
+var validation = jsonSchemaCore.validate(jsonSchemaCore)
 
 if (validation.isError()) {
 
-	_.log('The core schema is not valid!');
+	_.log('The core schema is not valid!')
 	validation.errors.forEach(function (error) {
 	
-		_.log(error);
-	});
-	_.log(validation);
+		_.log(error)
+	})
+	_.log(validation)
 }
 
 
 
 
-module.exports = Schema;
+module.exports = Schema
