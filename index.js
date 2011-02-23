@@ -182,7 +182,7 @@ _.extend(Validation.prototype, {
 	// start
 	
 	start: function (instance) {
-		
+
 		if (instance instanceof Object) {
 		
 			if (this.isObjectFlagged(instance)) return instance
@@ -190,16 +190,18 @@ _.extend(Validation.prototype, {
 			
 			this.flagObject(instance)
 		}
-		
+
 		instance = this.extends(instance); if (this.wasError()) return instance
 		
-		instance = this.pre(instance); if (this.wasError()) return instance
+		instance = this.adapters(instance, 'pre'); if (this.wasError()) return instance
 
 		instance = this.optional(instance); if (this.wasError() || instance === undefined) return instance
 		
 		instance = this.type(instance); if (this.wasError()) return instance
 		
-		instance = this.requires(instance)
+		instance = this.requires(instance); if (this.wasError()) return instance
+
+		instance = this.adapters(instance, 'post')
 		
 		return instance
 	},
@@ -227,12 +229,12 @@ _.extend(Validation.prototype, {
 		return this.callPlugin(this.schema.fallbacks.optional, instance, 'optional')
 	},
 		
-	pre: function (instance) {
+	adapters: function (instance, position) {
 	
-		if (!this.schema.pre) return instance
+		if (!this.schema[position]) return instance
 		
 		
-		var adapters = this.schema.pre
+		var adapters = this.schema[position]
 		
 		if (!(adapters instanceof Array)) adapters = [adapters]
 
@@ -268,8 +270,7 @@ _.extend(Validation.prototype, {
 			
 				if (toType === 'null') return instance === null
 				
-				if (toType === 'array') return instance instanceof Array 
-					|| _.isArguments(instance)
+				if (toType === 'array') return instance instanceof Array// || _.isArguments(instance)
 				
 				if (toType === 'object') return instance instanceof Object && !(instance instanceof Array)
 				
@@ -981,6 +982,10 @@ jsonSchemaCore.properties.id.pattern = new RegExp(jsonSchemaCore.properties.id.p
 jsonSchemaCore.properties.requires.additionalProperties = jsonSchemaCore;
 
 (jsonSchemaCore.properties.pre.items = new Schema(jsonSchemaCore.properties.pre.items))
+	.setFallbacks(Validation.STRICT_FALLBACKS);
+
+///
+(jsonSchemaCore.properties.post.items = new Schema(jsonSchemaCore.properties.post.items))
 	.setFallbacks(Validation.STRICT_FALLBACKS);
 
 (jsonSchemaCore.properties.fallbacks.additionalProperties = new Schema(jsonSchemaCore.properties.fallbacks.additionalProperties))

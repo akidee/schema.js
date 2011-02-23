@@ -83,6 +83,8 @@ maxItems, if >
 	remove
 	add Error
 
+Only add necessary fallbacks to reduce size!
+
 -- Rename validation.errors to report and use a list of lists. Remove (i18n) messages ... where put them?
 
 -- Be able to represent a validation report both as array (to get a simple list) and object tree that corresponds to the schema.

@@ -153,7 +153,21 @@ module.exports = {
 					type: ['string', 'any']
 				},
 				optional: true,
-				description: "One or several adapters identified by plugin IDs",
+				description: "One or several prefix adapters identified by plugin IDs",
+				nonStandard: true,
+					pre: 'addToRefs'
+			},
+
+			post: {
+		
+				// Allow closures
+				type: ['string', 'array', 'any'],
+				items: {
+				
+					type: ['string', 'any']
+				},
+				optional: true,
+				description: "One or several postfix adapters identified by plugin IDs",
 				nonStandard: true,
 					pre: 'addToRefs'
 			},
