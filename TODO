@@ -101,3 +101,5 @@ Only add necessary fallbacks to reduce size!
 Useful options are: default fallbacks, i18n file, version, ...
 
 -- Rename _ mixins validateCall to callValidly, add applyValidly, constructValidly and - with good documentation - f
+
+-- Try to cast objects to arrays (if all own keys are integeric)

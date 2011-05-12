@@ -127,6 +127,12 @@ _.extend(Validation.prototype, {
 			_.locale(i18n('validation_error'), this.locale)(this)
 		)
 		e.errors = this.errors
+		e.toJSON = function () {
+			return {
+				message: this.message,
+				errors: this.errors
+			}
+		}
 		return e
 	},
 	
@@ -912,37 +918,41 @@ _.extend(Schema, {
 
 			var isValidating = !!args[1],
 				schema = Schema.create(schema),
-				isAsync = !!args[2]
+				isAsync = !!args[2],
+				func_,
+				func__
+
+			if (!isAsync)
+				func_ = function () {
+
+					return Schema.validateCall.apply(Schema, [func, this].concat(slice.call(arguments)))
+				}
+			else
+				func_ = function () {
+
+					return Schema.validateCallAsync.apply(Schema, [func, this].concat(slice.call(arguments)))
+				}
 
 			func.SCHEMA = schema
 			func.IS_VALIDATING = isValidating
 			func.IS_ASYNC = isAsync
+	
+			func_.SCHEMA = schema
+			func_.IS_VALIDATING = isValidating
+			func_.IS_ASYNC = isAsync
 
-			if (isValidating) {
+			func__ = isValidating
+				? func_
+				: func			
 
-				var func_ = func
+			if (!isValidating) 
+				func__.validate = func_
 
-				if (!isAsync)
-					func = function () {
-
-						return Schema.validateCall.apply(Schema, [func_, this].concat(slice.call(arguments)))
-					}
-				else
-					func = function () {
-
-						return Schema.validateCallAsync.apply(Schema, [func_, this].concat(slice.call(arguments)))
-					}
-			}
-
-			func.SCHEMA = schema
-			func.IS_VALIDATING = isValidating
-			func.IS_ASYNC = isAsync
-		}
-		else {
-
-			func.IS_ASYNC = !!args[0]
+			return func__
 		}
 
+
+		func.IS_ASYNC = !!args[0]
 		return func
 	}
 })

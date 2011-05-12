@@ -2328,6 +2328,15 @@ a(
 	false
 )
 
+try {
+
+	obj.b.validate(10000)
+}
+catch (e) {
+
+	a(e instanceof Error, true)
+}
+
 
 	// schema, isValidating = true, isAsync = false, isfunc
 
