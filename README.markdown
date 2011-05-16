@@ -1,42 +1,56 @@
 # schema.js
 
-Modular data schema validation and adaptation according to [JSON Schema](http://json-schema.org/) for JavaScript (CommonJS). In development.
+* ... implements data schema validation and adaptation according to [JSON Schema](http://json-schema.org/) ([draft 2](http://tools.ietf.org/html/draft-zyp-json-schema-02)) for JavaScript (CommonJS).
+* ... serves as both documentation and validator of your data models
+* ... is sophisticated: environments, recursion detection, tolerant value adaptation, extendable
+* ... makes your work more agile. You don't need to unit test your validators any more.
 
 The following documents were regarded:
 
 * http://tools.ietf.org/html/draft-zyp-json-schema-02
-
 * http://groups.google.com/group/json-schema/web/json-schema-proposal-working-draft
 
-## Overview
+## API (currently not stable, since this is the restruct branch soon to be v0.2.0)
 
-In schema.js there are 3 classes:
+### Environment
 
-* Schema: Instances contain a JSON Schema.
+The environment is a context, where your schemas and validations live in. You need to create an environment before creating your schemas to define some default settings that will affect all schemas created in this environment:
 
-		var Schema = require('schema');
+```js	
+var myEnv = require('schema')('envIdentifier', options)
+
+The identifier is optional but recommended to retrieve the same environment - without any options - in another script.
+`options` is an object that can have the following keys:
+* `i18n` is a list of module identifiers or i18n packages that will be used inside this environment. To omit all messages in the validation errors, just use `[]`. Example for an i18n module: http://github.com/akidee/i18n/default.js. Default: `[ '../i18n/default' ]`
+* `fallbacks` defines the default fallbacks that are used when a schema is defined without the `fallbacks` attribute. Options: `'TOLERANT_FALLBACKS'`, `'STRICT_FALLBACKS'` or any other legal definition of the `fallbacks` attribute. Default: `'TOLERANT_FALLBACKS'`
+* `v`: Default and currently only option: `'json-schema-draft-02-schema.js'`
+* `detectRecursion` defines whether schema and value recursions should be detected. Not recommended to set to `false`. Default: `true`
+
+### myEnv.Schema
+
+Instances contain a JSON Schema:
 	
-		// mySchema instanceof Schema === true
-		var mySchema = Schema.create({type:'integer'});
+	var mySchema = Schema.create({type:'integer'})
 
-* Schema.Validation: The validation done with a schema and an instance.
+When writing a new schema for your project, you can use the file PROPERTY_OVERVIEW_02 to get a quick overview over all supported properties.
 
-		// validation instanceof Schema.Validation === true
-		var validation = mySchema.validate(5);
+### myEnv.Validation
+
+	var myValidation = mySchema.validate(5)
 	
-	A Schema.Validation instance implicits a finished validation, that has several properties:
+myValidation implicits a finished validation:
 
 	1. instance - the passed instance (adapted or not, depending of your schema settings)
 	2. errors - array of Schema.Validation.Error instances
 	3. validation.isError() - returns true if 1 or more errors occured
 
-* Schema.Validation.Error: validation Error - an instance has the following properties:
+### myValidation.Error
+
+myValidation.errors is an array with `myValidation.Error` instances:
 
 	1. path - the path in the object tree
 	2. name - the schema property that was violated
 	3. message - localized (still not supported)
-
-When writing a new schema for your project, your can use the file PROPERTY_OVERVIEW to get a quick overview over all supported properties.
 
 ## schema.js is different
 

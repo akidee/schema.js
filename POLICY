@@ -1,2 +1,0 @@
-Separate schema and uses (validation, ...)
-Put data that is not part of the standard into a sub-object that is used in a special context, like validation.
