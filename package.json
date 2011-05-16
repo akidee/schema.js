@@ -1,7 +1,7 @@
 {
   "name"          : "schema",
   "description"   : "Sophisticated JSON schema data validation and adaptation",
-  "homepage"      : "http://github.com/akidee/schema.js",
+  "repository"    : "http://github.com/akidee/schema.js",
   "author"        : "Andreas Kalsch",
   "keywords"      : ["json schema", "schema", "data", "validation"],
   "contributors"  : [],
