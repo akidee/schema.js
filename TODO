@@ -85,21 +85,31 @@ maxItems, if >
 
 Only add necessary fallbacks to reduce size!
 
--- Rename validation.errors to report and use a list of lists. Remove (i18n) messages ... where put them?
-
 -- Be able to represent a validation report both as array (to get a simple list) and object tree that corresponds to the schema.
 
--- Avoid duplicate reports
+XX Avoid duplicate reports
 
 -- schema.js needs to support async adapters and plugins. Use: Constraint checking against a persistence layer ...
 
--- Optimization: Check if property exists _before_ calling the checker (?)	
+-- Optimization: Check if property exists _before_ calling the checker to reduce calls
 
--- Better support for client side
+-- Include (packed) client version
 
 -- Make schema.js instantiable to allow running separate instances with different global options.
-Useful options are: default fallbacks, i18n file, version, ...
+Useful options are: default fallbacks, include/omit/choose i18n, version, recursion, 
 
 -- Rename _ mixins validateCall to callValidly, add applyValidly, constructValidly and - with good documentation - f
 
--- Try to cast objects to arrays (if all own keys are integeric)
+XX Try to cast objects to arrays (if all own keys are integeric)
+
+-- Type check as in _.js?
+
+XX Remove underscore(x) dependency
+
+XX Can disable recursive support for not setting __id (enumerable: true) in older browsers
+
+-- new Schema(schema, forAll)
+
+-- Exactly rethink the API. env.Schema.f or env.f ?
+
+-- Make it compatible with client (test!)
