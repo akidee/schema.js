@@ -7,8 +7,6 @@
 
 ## API
 
-_Currently there is no guarantee for API stability, since this is the restruct branch, which soon will be v0.2.0!_
-
 ### Environment
 
 The environment is a context, where your schemas and validations live in. You need to create an environment before creating your schemas to define some default settings that will affect all schemas created in this environment:
@@ -128,4 +126,4 @@ _To continue ..._
 ## Dependencies
 
 * JavaScript engine
-* CommonJS implementation, e.g. [node.js](http://nodejs.org/) on the server and [Yabble](http://github.com/akidee/yabble) on the client
+* CommonJS implementation, e.g. [node.js](http://nodejs.org/) on the server, [Yabble](http://github.com/akidee/yabble) on the client
