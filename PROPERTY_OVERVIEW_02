@@ -1,0 +1,41 @@
+Supported attributes in json-schema-draft-02-schema.js
+
+Attributes are listed by type:
+
+(all)
+	extends
+	pre
+	optional
+	type (no schema support)
+	enum
+	requires (must be object property schema)
+	post
+	
+	default
+	fallbacks
+
+	id
+	title
+	description
+	options
+		
+object
+	properties
+	additonalProperties
+	
+array
+	items
+	minItems
+	maxItems
+	
+number / integer
+	minimum
+	maximum
+	minimumCanEqual
+	maximumCanEqual
+	maxDecimal
+	
+string
+	minLength
+	maxLength
+	pattern
