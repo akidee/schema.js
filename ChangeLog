@@ -1,10 +1,14 @@
 Next:
 
-* Standardized naming and directory structure
-* Simplified fallback plugins
-* Plugins now belong to Validation
 * Some bug fixes
-* New and renamed underscore mixins: callValidly, applyValidly, constructValidly, f
+* Plugins now belong to environment.Validation
+* Simplified fallback plugins
+* Schema and Validations instances now live in an environment of default options
+* environment.f() function constructor
+* Remove dependencies
+* Error now belongs to Validation instance
+* Extendably modularized code structure
+* Complete default i18n package
 
 
 2010.09.09, Version 0.1a
