@@ -1,7 +1,8 @@
 var assert = require('assert'),
 	a = assert.strictEqual,
 	d = assert.deepEqual,
-	Schema = require('schema');
+	env = require('schema')(),
+	Schema = env.Schema
 	
 	
 	
