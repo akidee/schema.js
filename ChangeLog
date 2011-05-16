@@ -1,9 +1,8 @@
-Next:
+2011.05.16, Version 0.2.0
 
 * Some bug fixes
-* Plugins now belong to environment.Validation
-* Simplified fallback plugins
-* Schema and Validations instances now live in an environment of default options
+* Simplified fallback plugins now belong to environment.Validation
+* Schema and Validation instances now live in an environment of default options
 * environment.f() function constructor
 * Remove dependencies
 * Error now belongs to Validation instance

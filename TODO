@@ -113,3 +113,5 @@ XX Can disable recursive support for not setting __id (enumerable: true) in olde
 -- Exactly rethink the API. env.Schema.f or env.f ?
 
 -- Make it compatible with client (test!)
+
+-- Better validation.error.id()
