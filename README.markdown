@@ -17,10 +17,10 @@ var myEnv = require('schema')('envIdentifier', options)
 
 * The identifier is optional but recommended to retrieve the same environment - without options - in another script.
 * `options` is an object that can have the following keys:
-  * `'i18n'` is a list of module identifiers or i18n packages that will be used inside this environment. To omit all messages in the validation errors, just use `[]`. Example for an i18n module: http://github.com/akidee/schema.js/blob/master/i18n/index.js.
+  * `'i18n'` is a list of module identifiers or i18n packages that will be used inside this environment. To omit all messages in the validation errors, just use `[]`. [Example for an i18n module](http://github.com/akidee/schema.js/blob/master/i18n/default.js)
 Default: `[ '../i18n/default' ]`
   * `'fallbacks'` defines the default fallbacks that are used when a schema is defined without the `"fallbacks"` attribute. Options: `'TOLERANT_FALLBACKS'`, `'STRICT_FALLBACKS'` or any other legal definition of the `"fallbacks"` attribute. Default: `'TOLERANT_FALLBACKS'`
-  * `'v'`: Default and only supported option: `'json-schema-draft-02-schema.js'`
+  * `'v'`: Default and only supported option: `'draft-02'`
   * `'detectRecursion'` defines whether recursions should be detected on validation. Not recommended to set to `false`. Default: `true`
 
 ### myEnv.Schema
