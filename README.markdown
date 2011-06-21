@@ -5,6 +5,12 @@
 * is sophisticated: environments, recursion detection, tolerant value adaptation, extendable
 * makes your development more agile. You don't need to unit test your validators any more.
 
+## Installation
+
+```sh
+npm install schema
+```
+
 ## API
 
 ### Environment
