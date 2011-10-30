@@ -115,3 +115,7 @@ XX Can disable recursive support for not setting __id (enumerable: true) in olde
 -- Make it compatible with client (test!)
 
 -- Better validation.error.id()
+
+-- Take a look at Mongoose
+
+-- npm bundled dependencies ...
