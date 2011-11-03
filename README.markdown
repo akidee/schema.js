@@ -127,7 +127,11 @@ assert.strictEqual(
 )
 ```
 
-_To continue ..._
+### myEnv.f
+
+With this little utility, you create a secure JavaScript function with an implicit schema.
+
+Example: http://github.com/akidee/schema.js/blob/master/examples/myEnv.f.js
 
 ## Dependencies
 
