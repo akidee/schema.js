@@ -12,7 +12,7 @@ var func = myEnv.f(
 				type: 'array',
 				items: {
 					type: 'integer',
-					minimum: 10,
+					minimum: 10, 
 					maximum: 1000
 				},
 				minItems: 2,
