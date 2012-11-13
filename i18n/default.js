@@ -1,5 +1,5 @@
 module.exports = {
-	validation_error: {
+	/*validation_error: {
 	  de: function() {
 		return "Diese Instanz ist nicht gültig";
 	  },
@@ -22,5 +22,5 @@ module.exports = {
 	  en: function(validation) {
 		return "Der Text muss mindestens " + validation.schema.minLength + " Zeichen haben.";
 	  }
-	}
+	}*/
 };
