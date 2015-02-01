@@ -1,5 +1,8 @@
 # schema.js
 
+This solution is not actively maintained any longer. The find a JSON Schema validator take a look at these
+[benchmarks](https://github.com/Muscula/json-schema-benchmark).
+
 * implements data schema validation and adaptation according to [JSON Schema](http://json-schema.org/) ([draft 2](http://tools.ietf.org/html/draft-zyp-json-schema-02)) for JavaScript (CommonJS).
 * serves as both validator and documentation of your project's data models
 * is sophisticated: environments, recursion detection, tolerant value adaptation, extendable
